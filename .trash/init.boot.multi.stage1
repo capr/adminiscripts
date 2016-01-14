@@ -1,0 +1,17 @@
+#!/bin/bash (source!)
+#
+# stage1 boot (read-only, hardware)
+#
+
+# detect/init hardware (only after this, filesystems can be mounted by label)
+#srv udevd up
+
+bash
+
+# load acpid daemon (only after this, the power button works)
+srv acpid up
+
+# set the keyboard
+kbdrate -r 30 -d 250 >dev/null
+loadkeys us >/dev/null
+

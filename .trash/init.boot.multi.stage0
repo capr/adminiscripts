@@ -1,0 +1,19 @@
+#!/bin/bash (source!)
+#
+# stage 0 boot (essential, unprofilable, safe)
+#
+
+export PATH=/bin
+export LD_LIBRARY_PATH=/lib
+
+# mount system filesystems (only after this, sysctl and kcmdline works)
+mount -t proc	proc	/proc
+mount -t sysfs	sys	/sys
+mount -t usbfs	usb	/proc/bus/usb
+mount -t tmpfs	ram	/mnt/ram
+
+# panic on oopses (to prevent masking failures)
+sysctl -w kernel/panic_on_oops=1
+# don't reboot on panic (to avoid endless reboots on repeatable panics)
+sysctl -w kernel/panic=0
+

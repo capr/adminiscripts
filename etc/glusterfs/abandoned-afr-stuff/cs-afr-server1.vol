@@ -1,0 +1,52 @@
+#
+# Glusterfs server #1 config
+# Just rename as 'server' the volume you want to be used by the service 'gfs-server1'.
+#
+
+volume posixx
+    type storage/posix
+    option directory /mnt/sdb1/storage-afr
+end-volume
+
+volume iot
+    type performance/io-threads
+    option thread-count 2		# set this to <= CPU count
+    option cache-size 32MB
+    subvolumes posixx
+end-volume
+
+volume wb
+    type performance/write-behind
+    option aggregate-size 0		# aggregates writes in chunks for reducing network calls
+    option flush-behind off		# does this mean fake flush? is it faster? is it safe?
+    subvolumes iot
+end-volume
+
+volume posix
+    type performance/read-ahead
+    option page-size 128kB		# read-ahead in chunks
+    option page-count 2
+    option force-atime-update off	# on means huge perf. hit on reads
+    subvolumes wb
+end-volume
+
+volume ioc
+    type performance/io-cache
+    option cache-size 32MB
+    option page-size 128kB
+    option priority *:0
+    option force-revalidate-timeout 1
+    subvolumes posix
+end-volume
+
+# this is stupid: you need auth.ip.<brick>.allow for all subvolumes involved too, even for those indirectly accessed through other volumes!
+volume server
+    type protocol/server
+    option transport-type tcp/server
+    option bind-address 10.0.0.16
+    option listen-port 6996
+    subvolumes posix
+    option auth.ip.posix.allow *
+end-volume
+
+

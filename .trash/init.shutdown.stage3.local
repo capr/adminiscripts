@@ -1,0 +1,17 @@
+#!/bin/bash (source!)
+#
+# critical services @ local
+#
+
+# critical services
+srv ntpd1 down
+srv sshd down
+srv net.firewall.local.comtel down
+srv net.firewall.local.jt down
+srv net.if.comtel down
+srv net.if.jt down
+srv named.local1 down
+srv net.if.br_c1 down
+srv net.bridge.br_c1 down
+srv net.taps.c1 down
+

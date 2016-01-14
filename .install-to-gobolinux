@@ -1,0 +1,9 @@
+#!/bin/bash
+#
+# install admin-scripts in gobolinux
+# TODO: assumes AdminScripts is alreay in /Programs/AdminScripts/<whatever-version>
+# 
+#
+
+SymlinkProgram -f AdminScripts
+

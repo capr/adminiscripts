@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+# backup of magento test server operations database
+#
+
+inherit task.backup.myisam
+inherit subject.mysqld.magento
+
+# for task.backup
+backup_life_days=7
+backup_life_issues=56
+
+# for task.backup.myisam
+db=magento_test
+

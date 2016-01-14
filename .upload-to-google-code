@@ -1,0 +1,7 @@
+#!/bin/bash
+#
+# push the scripts to google-code
+#
+
+hg push https://adminscripts.code.google.com/hg
+

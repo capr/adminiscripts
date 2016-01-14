@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# file check script
+#	implements: what, short, info, search(), fix()
+#
+
+inherit task.check.files
+
+what="files with world-access"
+short="WRW"
+info="No files should escape the permission system (i.e. no world write access bits)."
+
+search() {
+    find "$1" -xdev -perm /o=rw ! -type l
+}
+
+fix() {
+    chmod o-rwx "$1"
+}
+

@@ -1,0 +1,16 @@
+#!/bin/bash (source!)
+#
+# boot a multiuser environment.
+#
+# TODO: implement /forcefsck, /fastboot as requested by shutdown.
+#
+
+inherit init
+inherit init.boot.stage0
+
+init_vars
+
+[ "$PROFILE" ] && say "Booting $PROFILE..." || die "No profile to boot."
+
+inherit "init.profile.$PROFILE.boot"
+

@@ -1,0 +1,26 @@
+#!/bin/bash (source!)
+#
+# bridges interfaces together
+#	requires: $bridge, $ifs
+#
+
+inherit service
+
+service_start() {
+    brctl addbr "$bridge"
+
+    for intf in $ifs; do
+	brctl addif "$bridge" "$intf"
+	ifconfig "$intf" 0.0.0.0 promisc up
+    done
+}
+
+service_stop() {
+    ifconfig "$bridge" down
+    brctl delbr "$bridge"
+}
+
+service_help() {
+    echo "start stop restart help"
+}
+

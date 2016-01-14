@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+# Visually check out the SOA on all our dns servers that host our zones.
+#
+
+inherit task.check.ns
+
+task_run() {
+    for d in $zones; do
+	for s in $authoritative_servers; do
+	    dig "@$s" "$d" -t SOA | grep "admin.gazolin.ro"
+	done
+    done
+}
+

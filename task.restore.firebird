@@ -1,0 +1,56 @@
+#!/bin/bash
+#
+# firebird restore task API
+#	implements:			restore
+#	uses from task.backup: 		$src_dir
+#	uses from server subjects:	$FIREBIRD, $host, $username, $password
+#	uses from database subjects:	$db
+#
+# Bugs:
+# - the stupid nbackup program won't take (gbak works) but localhost:database, not just
+# any-hostname-:database for the -B switch. it will accept a full path without hostname for
+# the -R switch though.
+# - nbackup doesn't support multiple-file databases but it will not complain if you try
+# to backup such a db!
+#
+
+inherit task.backup
+
+restorep() {
+    export FIREBIRD
+    # in case $db is a full pathname with extension, we strip it to get the actual database name
+    dbname="$(basename "$db" .fdb)"
+    
+    local ret1; restore_nbackup; ret1=$?; [ $ret1 = 0 ] && say "OK" || say "FAILED"
+    local ret2; restore_gbak; ret2=$?; [ $ret2 = 0 ] && say "OK" || say "FAILED"
+    local ret3; restore_metadata; ret3=$?; [ $ret3 = 0 ] && say "OK" || say "FAILED"
+    [ $ret1 != 0 -o $ret2 != 0 -o $ret3 != 0 ] && return 1
+    return 0
+}
+
+restore_nbackup() {
+    ### BUG: nbackup only works on localhost so we'll skip it ###
+    say "STARTING nbackup backup of $host:$db..."
+    error "NOT IMPLEMENTED"
+    return 0
+    local file="$dest_dir/$dbname.nbk0"
+    error <&3
+    nbackup -U "$username" -P "$password" -B 0 "$host:$db" "$file"
+}
+
+restore_gbak() {
+    say "STARTING gbak backup of $host:$db..."
+    local file="$dest_dir/$dbname.gbk"
+    gbak -user "$username" -password "$password" -transportable -backup_database "$host:$db" "$file" &&
+	zip -qrj "$dest_dir/$dbname.gbk.zip" "$file" &&
+	    rm "$file"
+}
+
+restore_metadata() {
+    say "STARTING isql metadata-only backup of $host:$db..."
+    local file="$dest_dir/$dbname.sql"
+    isql -ex -u "$username" -p "$password" "$host:$db" > "$file" &&
+	zip -qrj "$dest_dir/$dbname.sql.zip" "$file" &&
+	    rm "$file"
+}
+

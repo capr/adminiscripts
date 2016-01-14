@@ -1,0 +1,61 @@
+#
+# Crontab file.
+#
+# SUMMARY:
+#	- hourly backups happen on the hour, so hourly-saved databases are saved on the half-hour.
+#	- likewise, daily backups happen at 4:00am, so daily-saved databases are saved just an hour before.
+#
+
+# MINUTE HOUR DAY MONTH DAY-OF-WEEK COMMAND
+
+# every minute, all the time: ping synco
+*  *  *  *  *  wget -q -O /dev/null --http-user=synco --http-passwd=detest --no-check-certificate https://login.synco.ro
+
+# hourly, on the hour: backup to backup1
+00 *  *  *  *  tsk backup.files.hourly.bk1
+05 *  *  *  *  tsk backup.files.xls.bk1
+10 *  *  *  *  tsk backup.firebird.gazolin_prod.bk1
+15 *  *  *  *  tsk backup.firebird.gazolin_test.bk1
+20 *  *  *  *  tsk backup.mysqldump.magento2.bk1
+25 *  *  *  *  tsk backup.mysqldump.magento_mirror.bk1
+
+# hourly, on the half-hour: backup to backup2
+30 *  *  *  *  tsk backup.files.hourly.bk2
+35 *  *  *  *  tsk backup.files.xls.bk2
+40 *  *  *  *  tsk backup.firebird.gazolin_prod.bk2
+45 *  *  *  *  tsk backup.firebird.gazolin_test.bk2
+50 *  *  *  *  tsk backup.mysqldump.magento2.bk2
+55 *  *  *  *  tsk backup.mysqldump.magento_mirror.bk2
+
+# 2-3am: backup wiki databases and sync root partition
+00 02 *  *  *  tsk backup.myisam.personal_wiki.bk1
+05 02 *  *  *  tsk backup.myisam.personal_wiki.bk2
+10 02 *  *  *  tsk backup.myisam.gazolin_wiki.bk1
+15 02 *  *  *  tsk backup.myisam.gazolin_wiki.bk2
+20 02 *  *  *  tsk sync.root.local.bk
+
+# 3-7am: big daily backups
+00 03 *  *  *  tsk backup.files.daily.bk1
+00 05 *  *  *  tsk backup.files.daily.bk2
+
+# 7-8am: interlaced cleanup of hourly backups (will fail if backups still in progress)
+00 07 *  *  *  tsk backup.files.hourly.bk2		cleanup
+05 07 *  *  *  tsk backup.files.xls.bk2			cleanup
+10 07 *  *  *  tsk backup.firebird.gazolin_prod.bk2	cleanup
+15 07 *  *  *  tsk backup.firebird.gazolin_test.bk2	cleanup
+20 07 *  *  *  tsk backup.mysqldump.magento2.bk2	cleanup
+25 07 *  *  *  tsk backup.mysqldump.magento_mirror.bk2	cleanup
+30 07 *  *  *  tsk backup.files.hourly.bk1		cleanup
+35 07 *  *  *  tsk backup.files.xls.bk1			cleanup
+40 07 *  *  *  tsk backup.firebird.gazolin_prod.bk1	cleanup
+45 07 *  *  *  tsk backup.firebird.gazolin_test.bk1	cleanup
+50 07 *  *  *  tsk backup.mysqldump.magento2.bk1	cleanup
+55 07 *  *  *  tsk backup.mysqldump.magento_mirror.bk1	cleanup
+
+# 8-9am: cleanup of daily backups (3h time since last backup started)
+00 08 *  *  *  tsk backup.files.daily.bk1		cleanup
+00 08 *  *  *  tsk backup.files.daily.bk2		cleanup
+
+# monthly, on the first night of the month: download named hints file
+00 04 01 *  *  tsk named.get-hints-file
+

@@ -1,0 +1,9 @@
+#!/bin/bash (source!)
+#
+# Intranet's OpenNTP server
+#
+
+inherit service.ntpd
+
+conf=/etc/ntpd2.conf
+

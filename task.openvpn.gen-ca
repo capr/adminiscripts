@@ -1,0 +1,9 @@
+#!/bin/bash
+
+inherit task.openvpn
+
+task_run() {
+    "$EASY_RSA/clean-all"
+    "$EASY_RSA/pkitool" --initca
+}
+

@@ -1,0 +1,39 @@
+#!/bin/bash
+#
+# task to fix tcp/ip access scheme for a mysql server to allow only root on all dbs from all hosts,
+# in other words, bypass the source host access scheme.
+#
+# assumes default mysql settings: root@127.0.0.1/no password.
+#
+# WARNING: this removes all non-root users.
+#
+
+inherit task.mysqld
+
+task_run() {
+
+    ### TODO: finish this !!! ###
+    
+    #
+    # THE IDEA is to have:
+    # 1) in table mysql.db: just one record: (host, db, user, *) = (%, %, %, Y...)
+    # 2) in table mysql.user: just one record: (host, user, password, *) = (%, root, root's password, Y...)
+    #
+    # also: connect using unix sockets, since the root@127.0.0.1/no password scheme will be disabled!
+    # 
+
+    if [ "$allowdeny" == "allow" ]; then
+	sql_cmd="insert into db (host, db) values ('$access_host', '$access_db'); \
+	        insert into user (host, db) values ('$access_host', '$access_db'); \
+		flush privileges;"
+    elif [ "$allowdeny" == "deny" ]; then
+	sql_cmd="delete from db where host='$access_host' and db='$access_db'; \
+	        delete from user where host='$access_host' and db='$access_db'; \
+	        flush privileges;"
+    else
+	bug
+    fi
+
+    echo "$sql_cmd" | mysql --host=127.0.0.1 --user=root --database=mysql
+}
+

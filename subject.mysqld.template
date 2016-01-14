@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+# mysql server subject template for mysql servers in the local domain.
+# only the 'root' user is used all around.
+#
+# implements: $host, $srv_name, $myisam_dir, $innodb_dir
+# uses: $sname
+# missing: $username, $password
+#
+
+host=mysql-$sname.local
+srv_name=mysqld.$sname
+myisam_dir=/Files/mysqld.$sname-myisam-directory
+innodb_dir=/Files/mysqld.$sname-innodb-directory
+socket_file=/var/sockets/mysqld.$sname.socket
+

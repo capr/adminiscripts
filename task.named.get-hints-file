@@ -1,0 +1,21 @@
+#!/bin/bash (source!)
+#
+# task to get hints (root) file for named
+#
+
+inherit locking
+
+root_file_url=http://www.internic.net/zones/named.cache
+root_file_dir=/var/spool/named
+
+task_run() {
+    aquire_lock "task.$task"
+    wget $root_file_url -O "$root_file_dir/named.cache.new" >/dev/null || error "wget $root_file_url $root_file_dir/named.cache.new failed [$?]"
+    mv -f "$root_file_dir/named.cache.new" "$root_file_dir/named.cache" || error "mv -f $root_file_dir/named.cache.new $root_file_dir/named.cache failed"
+    release_lock "task.$task"
+}
+
+task_running() {
+    locked "task.$task"
+}
+

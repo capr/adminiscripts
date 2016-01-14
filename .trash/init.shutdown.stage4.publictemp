@@ -1,0 +1,28 @@
+#!/bin/bash (source!)
+#
+# services @ local
+#
+
+srv root down
+
+srv crond.publictemp down
+
+# from public...
+srv httpd.gazolin1 down
+srv fb down
+srv postfix down
+srv ftpd1 down
+srv named.public1 down
+srv dhcpd2 down
+srv openvpn.s1tcp1 down
+srv openvpn.s1udp1 down
+
+# from local...
+srv smbd down
+srv httpd.gtest down
+srv fbtest down
+srv httpd.intranet down
+srv mysqld down
+srv mount.backup1 down
+srv mount.backup2 down
+

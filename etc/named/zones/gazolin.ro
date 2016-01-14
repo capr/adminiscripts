@@ -1,0 +1,39 @@
+$ORIGIN .
+$TTL 1H
+gazolin.ro		IN SOA	ns1.gazolin.ro. admin.gazolin.ro. (
+				2009061702 ; serial (yyyymmddnn)
+				1H         ; refresh (1H-2D) -- everydns.net updates every hour on the hour!
+				15M        ; retry (15M-1D)
+				4W         ; expire (1W-6W)
+				1H         ; minimum (15M-1W but 1H-3H recommended)
+				)
+			NS	ns1.gazolin.ro.		; 
+			NS	ns1.everydns.net.	; 
+			NS	ns2.everydns.net.	; 
+			NS	ns3.everydns.net.	; 
+			NS	ns4.everydns.net.	; 
+			A	87.239.226.253		; ip1.synco
+			MX	10 aspmx.l.google.com.
+			MX	20 alt1.aspmx.l.google.com.
+			MX	20 alt2.aspmx.l.google.com.
+			MX	30 aspmx3.googlemail.com.
+			MX	30 aspmx4.googlemail.com.
+			MX	30 aspmx5.googlemail.com.
+			TXT	"v=spf1 include:aspmx.googlemail.com ~all"
+$ORIGIN gazolin.ro.
+ns1			A	87.239.226.253		; = ip1.synco.local (as per named.public1.conf)
+www			CNAME	gazolin.ro.		; = gazolin1.local
+firebird-wiki		CNAME	gazolin.ro.
+intranet		CNAME	gazolin.ro.
+ftp			CNAME	gazolin.ro.		; ftp1.local
+vpn			CNAME	gazolin.ro.		; as per openvpn/client.*
+static			A	87.239.226.254		; = gazolin-static.local
+secure			CNAME	gazolin.ro.		; as per ssl cert. file
+cataloage		CNAME	static.gazolin.ro.	; static.gazolin.ro vhost
+calendar		CNAME	ghs.google.com.
+docs			CNAME	ghs.google.com.
+mail			CNAME	ghs.google.com.
+sites			CNAME	ghs.google.com.
+start			CNAME	ghs.google.com.
+googlea6e3690924a0a2e7	CNAME	google.com.
+

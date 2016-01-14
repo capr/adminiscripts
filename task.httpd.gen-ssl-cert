@@ -1,0 +1,26 @@
+#!/bin/bash
+#
+#	uses: $keydir
+#
+
+inherit task.httpd
+
+task_run() {
+    local domain="$1"
+    [ "$domain" ] || die "Usage: $@ <domain name>"
+
+    local fn="$keydir/$domain"
+
+    echo "*** NOTE: Common Name (CN) should be the domain name of the site you want to secure ***"
+    #1: gen server key and csr (cert. signing request)
+    openssl genrsa -des3 -out "$fn.key"
+    openssl req -new -key "$fn.key" -out "$fn.csr"
+
+    #2: sign the csr using CA
+    openssl x509 -req -days 3650 -in "$fn.csr" -CA "$keydir/ca.crt" -CAkey "$keydir/ca.key" -set_serial 01 -out "$fn.crt"
+
+    #3: remove passphrase out of server cert file
+    openssl rsa -in "$fn.key" -out "$fn.key.insecure"
+    rm "$fn.key" && mv "$fn.key.insecure" "$fn.key"
+}
+

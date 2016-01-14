@@ -1,0 +1,11 @@
+#!/bin/bash (source!)
+#
+# Local storage (ext3)
+#	uses: $service
+#
+
+inherit service.mount.by-label
+
+device_label="${service#mount.}"
+mount_options="noatime,barrier=1,data=ordered"
+

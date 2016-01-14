@@ -1,0 +1,2 @@
+init-scripts are scripts called by init via the init-event handler
+for various runlevels, as per inittab.

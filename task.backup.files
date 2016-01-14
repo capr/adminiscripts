@@ -1,0 +1,80 @@
+#!/bin/sh
+#
+# generic incremental backup using rsync --link-dest
+#	implements: backup
+#	uses from task.backup: $dest_dir, $latest_backup_dir
+#	uses from subjects:
+#		$catalog_dir		the directory containing symlinks to directories to backup (only directories!)
+#		$rsync_filters		man rsync for filters syntax
+#		$prune_empty_dirs	set it to whatever value to skip creating empty dirs
+#		$bw_limit_kbps		transfer bandwidth limit, in KB/s
+#	uses from ui:
+#		$verbose		make rsync splash everything on screen (TODO: no logging of that!)
+#
+# LIMITATIONS/TODO:
+#	- instead of backup'ing the live, changing system, do a LVM snapshot instead, mount it, and backup that!
+#	- this method is sensitive to moving files, in contrast to block-level snapshots.
+#
+
+inherit task.backup
+
+exp() { echo "$2"; }
+
+backup() {
+    #local opt_verbose="-v --progress"		# way too verbose!
+    #local opt_testmode="-n"			# dry-run mode: run without side effects
+    #local opt_checksum="-c"			# do checksums instead of mtime & size comparisons between source and dest.
+    #local opt_compress="-z"			# compress transfers (for slow networks)
+    local opt_bwlimit="--bwlimit $bw_limit_kbps"	# limit I/O bandwidth (KB/s)
+    local opt_preserve_hlinks="-H"		# preserve hard links between files in the source directory (?)
+    local opt_preserve_sparse="-S"		# treat sparse files as sparse files
+    #local opt_preserve_ids="--numeric-ids"	# don't translate UID/GIDs (when copying to a diff. host of course)
+    #local opt_preserve_acl="-A"		# preseve ACLs along with permissions
+    #local opt_preserve_xattr="-X"		# preserve extended attributes
+    local opt_prune_empty_dirs="-m"		# don't create or leave empty dirs in destination
+    
+    local opt_filter=""
+    if [ "$rsync_filters" ]; then
+	#for i in $(seq 1 ${#rsync_filters[@]}); do
+	for i in "${rsync_filters[@]}"; do
+	    [ "$i" ] && opt_filter="$opt_filter -f \"$i\""	# apply any filter rules in order
+	done
+    fi
+
+    [ "$bw_limit_kbps" ] || unset opt_bwlimit
+    [ "$verbose" ] || unset opt_verbose
+    [ "$prune_empty_dirs" ] || unset opt_prune_empty_dirs
+    
+    # -a = archive (aka -rlptgoD)
+    # -x = don't recurse into overmounts (one filesystem)
+    local opt="-a -x $opt_verbose $opt_testmode $opt_checksum $opt_compress $opt_bwlimit \
+		$opt_preserve_hlinks $opt_preserve_sparse $opt_preserve_ids $opt_preserve_acl \
+		$opt_preserve_xattr $opt_prune_empty_dirs $opt_filter"
+
+    local ret=0
+    pushd "$catalog_dir" >/dev/null
+    find * -maxdepth 0 -type l |
+	while read link; do
+	    source_dir="$(readlink "$link")"
+
+	    if [ ! -d "$source_dir" ]; then
+		warn "Skipped symlink $link pointing to non-directory $source_dir."
+		continue
+	    fi
+	    
+	    # see if there's any latest backup dir to do incremental backup against
+	    if [ "$latest_backup_dir" -a -d "$latest_backup_dir/$link" ]; then
+		opt_link_dest="--link-dest="$latest_backup_dir/$link""
+	    fi
+	    
+	    cmd="rsync $opt $opt_link_dest "$source_dir/" "$dest_dir/$link""
+	    say "Rsync'ing $source_dir..."
+	    #say "Backup command is: $cmd"
+	    #we use eval cuz there are " characters to be expanded (cleaner method?)
+	    eval "$cmd" || exit $?	### ATTN! this only exits the pipe, not the whole script!
+	done
+    ret=$?
+    popd >/dev/null
+    return $ret
+}
+

@@ -1,0 +1,11 @@
+#!/bin/bash (source!)
+#
+# Local storage (reiserfs)
+#
+
+inherit service.mount.by-label
+
+device_label=root
+mount_point=/mnt/root.local
+mount_options="noatime,barrier=flush,data=ordered"
+

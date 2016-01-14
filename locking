@@ -1,0 +1,39 @@
+#!/bin/bash
+#
+# resource locking API
+#	implements:
+#		aquire_lock <lock-name> [<lock-dir>]
+#		release_lock <lock-name> [<lock-dir>]
+#		locked <lock-name> [<lock-dir>]
+#	uses: $lockdir
+#
+# BUG: skill -n pid doesn't list a background process whose parent process was termniated. checkout locking.unittest!
+#
+
+lockdir="/var/run"
+
+lock_file() {
+    assert "$1"
+    [ "$2" ] && local ld="$2" || local ld="$lockdir"
+    echo "$ld/$1.lock"
+}
+
+# returns 0 if resource is locked, 1 if not locked.
+locked() {
+    local file="$(lock_file $@)"
+    local pid="$(cat "$file" 2>/dev/null)"
+    [ "$pid" ] && [ "$(skill -n $pid)" ] && return 0
+    return 1
+}
+
+# returns 0 if lock aquired, 1 if the resource is already locked by a running process or error writing lock file
+aquire_lock() {
+    locked $@ && return 1
+    echo "$$" > "$(lock_file $@)"
+    return 0
+}
+
+release_lock() {
+    rm "$(lock_file $@)"
+}
+

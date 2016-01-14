@@ -1,0 +1,25 @@
+#
+# GlusterFS server volume file.
+#
+
+volume data.public
+    type storage/posix
+    option directory /mnt/data.public
+end-volume
+
+volume root.public.bk
+    type storage/posix
+    option directory /mnt/root.public.bk
+end-volume
+
+# this is stupid: you need auth.ip.<brick>.allow for all subvolumes involved too!!
+volume server
+    type protocol/server
+    option transport-type tcp/server
+    option bind-address public.local
+    option listen-port 6996
+    subvolumes data.public root.public.bk
+    option auth.ip.data.public.allow local.local
+    option auth.ip.root.public.bk.allow local.local
+end-volume
+

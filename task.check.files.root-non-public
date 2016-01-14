@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# file check script
+#	implements: what, short, info, search(), fix()
+#
+
+inherit task.check.files
+
+what="root's files not in the public group"
+short="RP"
+info="All root's files (with some exceptions) should be in the public group."
+exclude_list="task.check.files.list.root-private"
+
+search() {
+    find "$1" -xdev -user 0 ! -type l ! -group public
+}
+
+fix() {
+    chgrp public "$1"
+}
+

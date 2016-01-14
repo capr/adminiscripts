@@ -1,0 +1,6 @@
+#!/bin/bash
+
+inherit task.backup.firebird.gazolin_prod
+
+backups_dir=/Files/backups1/databases/gazolin_prod
+

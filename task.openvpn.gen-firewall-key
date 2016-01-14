@@ -1,0 +1,8 @@
+#!/bin/bash
+
+inherit task.openvpn
+
+task_run() {
+    openvpn --genkey --secret "$KEY_DIR/firewall.key"
+}
+

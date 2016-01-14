@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# file check script
+#	implements: what, short, info, search(), fix()
+#
+
+inherit task.check.files
+
+what="root's files writable within group"
+short="RW"
+info="Root should not share write access within group (with a few exceptions)."
+exclude_list="task.check.files.list.root-writable"
+
+search() {
+    find "$1" -xdev -user 0 -perm /g=w ! -type l
+}
+
+fix() {
+    chmod g-w "$1"
+}
+

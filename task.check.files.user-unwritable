@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# file check script
+#	implements: what, short, info, search(), fix()
+#
+
+inherit task.check.files
+
+what="users' files unwritable within group"
+short="UU"
+info="Users should share write access within group."
+
+search() {
+    find "$1" -xdev ! -user 0 ! -perm -g=rw
+}
+
+fix() {
+    chmod g+w "$1"
+}
+

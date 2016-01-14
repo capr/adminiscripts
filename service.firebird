@@ -1,0 +1,45 @@
+#!/bin/bash (source!)
+#
+# firebird service API
+#	uses: $pid, $FIREBIRD, $FIREBIRD_TMP, $fb_user
+#
+# TODO: 
+# - run firebird as a non-priviledged user. Basically, I need to know either how to downgrade a process who's pid I know,
+# or how to get the pid of the program that I execute with su. Note: dir of pid file must be writable by $fb_user!
+#
+# BUGS:
+# Firebird has such a lousy way to do this. I gave up on fbmgr and fbguard and just start/stop fbserver directly.
+#
+
+inherit service
+
+service_start() {
+    #this stupid program won't work with multiple firebird installations so we'll just start fbserver ourselves
+    #exec echo "\"$FIREBIRD/bin/fbmgr.bin\" -pidfile \"$pid\" -start -forever" | su $fb_user
+    export FIREBIRD
+    export FIREBIRD_TMP
+    mkdir -p "$FIREBIRD_TMP"
+    "$FIREBIRD/bin/fbserver" -d -e "$FIREBIRD" &
+    #TODO: | su "$fb_user" &
+    ret=$?; echo "$!" > "$pid"
+    return $ret
+}
+
+service_stop() {
+    #this stupid program complains about some clumplet stuff... so we'll just signal the server to die instead
+    #echo "\"$FIREBIRD/bin/fbmgr.bin\" -pidfile $pid -shut -now" | su $fb_user
+    kill_pidfile "$pid"
+}
+
+service_status() {
+    running_pidfile "$pid" clean
+}
+
+service_kill() {
+    killall -9 fbserver
+}
+
+service_help() {
+    echo "start stop status restart kill help"
+}
+

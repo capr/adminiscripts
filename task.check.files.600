@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+# file check script
+#	implements: what, short, info, search(), fix()
+#
+
+inherit task.check.files
+
+what="the 600 root files"
+info="Some well known files should be root:root with 600 perms."
+
+search() {
+    find_files_in_list "task.check.files.list.root-600" | 
+	while read f; do
+	    find "$f" \( ! -user 0 -o ! -group 0 -o ! -perm 600 \)
+	done
+}
+
+fix() {
+    chmod 600 "$1"
+    chown 0:0 "$1"
+}
+

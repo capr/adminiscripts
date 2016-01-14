@@ -1,0 +1,13 @@
+#!/bin/bash (source!)
+#
+# boot a single user environment.
+#
+# Whatever you do here, make sure not to crash/lock the system so you'll 
+# be able to get your single login shell.
+#
+
+inherit init
+inherit init.boot.stage0
+
+echo "Entering single mode..."
+

@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# file check script
+#	implements: what, short, info, search(), fix()
+#
+
+inherit task.check.files
+
+what="writable suid/sgid files"
+short="SUIDW"
+info="Suid/sgid files should be read-only.
+This is one of the largest security holes you can have!"
+
+search() {
+    find "$1" -xdev -type f -perm +6000 -perm /go=w
+}
+
+fix() {
+    chmod go-w "$1"
+}
+

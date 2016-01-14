@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# clone the current directory with all its contents to another location using only symlinks.
+# good for making multiple instances of programs.
+
+[ -z "$1" ] && { echo "Usage: $0 <dest_directory>"; exit 1; }
+[ ! -d "$1" ] && { echo "$1 is not a directory"; exit 1; }
+pwd=`pwd`
+
+ls -a | 
+    while read i
+    do
+	[ "$i" != "." -a "$i" != ".." ] &&
+		ln -s "$pwd/$i" "$1/$i"
+    done
+

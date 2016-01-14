@@ -1,0 +1,68 @@
+#!/bin/sh
+#
+# synchronize (backup) of a directory using rsync --delete
+#	uses from subjects:
+#		$source_file		what to sync; terminate with "/" to copy dir's contents rather than dir itself
+#		$dest_dir		where to put the files
+#		get_files()		override to return a list of "$source_file" "$dest_dir"
+#		$bw_limit_kbps		transfer bandwidth limit, in KB/s
+#		post_sync		do more stuff after sync
+#	uses from ui:
+#		$verbose		make rsync splash everything on screen (TODO: no logging of that!)
+#
+# BUGS: -D does not work! no device files, sockets, fifos are copied!!
+#
+
+inherit locking
+
+# override this if you want only some files from $source_dir to be copied
+get_source_files() {
+    echo "$source_file" "$dest_dir"
+}
+
+# override this
+post_sync() { return 0; }
+
+task_run() {
+    aquire_lock "$task"
+
+    #local opt_verbose="-v --progress"		# way too verbose!
+    #local opt_testmode="-n"			# dry-run mode: run without side effects
+    #local opt_checksum="-c"			# do checksums instead of mtime & size comparisons between source and dest.
+    #local opt_compress="-z"			# compress transfers (for slow networks)
+    local opt_bwlimit="--bwlimit $bw_limit_kbps"	# limit I/O bandwidth (KB/s)
+    local opt_preserve_hlinks="-H"		# preserve hard links between files in the source directory
+    local opt_preserve_sparse="-S"		# treat sparse files as sparse files
+    local opt_include_special_files="-D"	# also copy device, socket and fifo files
+    local opt_preserve_ids="--numeric-ids"	# don't translate UID/GIDs (when copying to a diff. host of course)
+    #local opt_preserve_acl="-A"		# preseve ACLs along with permissions (we're not using ACLs)
+    #local opt_preserve_xattr="-X"		# preserve extended attributes (we're not using xattrs)
+
+    [ "$bw_limit_kbps" ] || unset opt_bwlimit
+    [ "$verbose" ] || unset opt_verbose
+    
+    # -a = archive (aka -rlptgoD)
+    # -x = don't recure into overmounts (one filesystem)
+    # --delete = delete files in destination that are not found in the source
+    local opt="-a -x --delete $opt_verbose $opt_testmode $opt_checksum $opt_compress $opt_bwlimit $opt_preserve_hlinks \
+		$opt_preserve_sparse $opt_include_special_files $opt_preserve_ids $opt_preserve_acl $opt_preserve_xattr"
+
+    local ret=0
+    get_files |
+	while read src dst; do
+	    [ "$ret" == "0" ] || exit # this means exit the 'while' end of the pipe, not the whole program
+	    local cmd="rsync $opt "$src" "$dst""
+	    say "Rsync'ing $src to $dst..."
+	    mkdir -p "$dst"
+	    $cmd; ret=$?
+	done
+
+    post_sync
+    release_lock "$task"
+    return $ret
+}
+
+task_running() {
+    locked "$task"
+}
+

@@ -1,0 +1,10 @@
+
+default 0
+timeout 5
+
+title GoboLinux - AdminScripts/sandbox
+kernel (hd0,0)/boot/kernel vt.default_utf8=0 vga=791 root=/dev/sda1 profile=sandbox loglevel=5
+
+title GoboLinux - BootScripts
+kernel (hd0,0)/boot/kernel vt.default_utf8=0 vga=791 root=/dev/sda1  
+

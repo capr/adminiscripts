@@ -1,0 +1,148 @@
+#!/bin/bash
+#
+# backup task API driver (i.e will drive the backup process, but won't do backup itself)
+#	implements:
+#		task_run, task_running
+#		$dest_dir				the directory where backup() should put its files
+#		$latest_backup_dir			the directory of the most recent backup, for incremental backup and for cleanup
+#	uses from implementors:
+#		backup					the backup worker procedure
+#	uses from subjects:
+#		$backups_dir				directory of all backups
+#		$backup_life_days			backup session life until cleanup, in days relative to the latest backup
+#		$backup_life_hours			backup session life until cleanup, in hours relative to the latest backup 
+#		$backup_life_issues			backup session life until cleanup, in number of backup issues since the latest backup
+#	uses from the tsk front-end:
+#		$1					"cleanup", which will delete backups older than
+#							$backup_life_days relative to the mtime of the latest backup
+#
+# NOTES:
+# - $backups_dir is an aquired resource during backup, so you can't have two backup processes at the same time on it.
+# - the backup procedure must return 0 otherwise we won't commit the backup, and instead we will delete it.
+#
+
+inherit locking
+
+syslog_facility=news
+
+latest_backup_dirname="latest-backup"
+
+mtime_sec() { find "$1" -maxdepth 0 -printf "%T@"; }
+
+is_integer() { local s="$(echo "$1" | tr -d 0-9)"; [ "$s" ] && return 1; return 0; }
+
+list_time_old_backups() {
+    [ "${backup_life_days}${backup_life_hours}" ] || return 0
+    [ -d "$latest_backup_dir" ] || return 0
+    
+    local ref_mtime=$(mtime_sec "$latest_backup_dir")
+
+    [ "$backup_life_days" ] && ref_mtime=$((ref_mtime - backup_life_days * 24 * 3600))
+    [ "$backup_life_hours" ] && ref_mtime=$((ref_mtime - backup_life_hours * 3600))
+    
+    ls -1 "$backups_dir/" | while read f; do
+	if is_integer "$f"; then
+	    local m=$(mtime_sec "$backups_dir/$f")
+	    [ $m -lt $ref_mtime ] && echo "$f"
+	fi
+    done
+}
+
+list_issues_old_backups() {
+    [ "$backup_life_issues" ] || return 0
+
+    local i=1
+    ls -1 -r "$backups_dir/" | while read f; do
+	if is_integer "$f"; then
+	    [ $i -gt $backup_life_issues ] && echo "$f"
+	    i=$((i+1))
+	fi
+    done
+}
+
+list_old_backups() {
+    # we only consider for deletion the backups that are old enough for _all_ life-expiring conditions
+    # that's why we intersect all the file lists together
+    # it's also nice that the file list gets out sorted so we can delete the backups in chronological order
+    comm -12 <(list_time_old_backups | sort) <(list_issues_old_backups | sort)
+}
+
+task_run() {
+
+    assert_var backups_dir
+    
+    trap cleanup SIGINT SIGTERM SIGQUIT SIGABRT EXIT
+
+    mkdir -p "$backups_dir/in-progress"
+    aquire_lock "backup" "$backups_dir/in-progress"
+    
+    latest_backup_dir="$backups_dir/$latest_backup_dirname"
+
+    if [ "$1" == "cleanup" ]; then
+    	
+	[ "$backup_life_hours" ] || backup_life_hours=0
+	assert_var backup_life_days
+	assert_var backup_life_hours
+	assert_var backup_life_issues
+
+	say "STARTING backup CLEANUP for '$backups_dir'..."
+	
+	if list_old_backups | 
+		while read f; do
+		    sayn "Removing $backups_dir/$f..."
+		    rm -R "$backups_dir/$f" && sayb "OK" || sayb "FAILED with code $?."
+		done
+	then
+	    say "SUCCESS to cleanup backup dir."
+	else
+	    error "FAILED with code $?."
+	    return 1
+	fi
+    else
+	local n=1
+        if [ -d "$latest_backup_dir" ]; then
+	    n="$(readlink "$latest_backup_dir")"
+    	    n=$((10#$n+1))
+        fi
+	backup_version="$(printf "%06d" $n)"
+    
+	dest_dir="$backups_dir/in-progress/temp.$$.$RANDOM"
+	mkdir -p "$dest_dir"
+
+	say "STARTING backup for '$backups_dir' version $backup_version..."
+	if backup; then
+    	    if [ "$(ls -A "$dest_dir")" ]; then
+	        if commit; then
+		    say "SUCCESS to commit backup dir."
+		else
+		    error "FAILED to commit backup dir."
+		    return 1
+		fi
+	    else
+		error "FAILED because backup dir was found empty."
+		return 1
+	    fi
+	else
+	    error "FAILED with code $?."
+	    return 1
+	fi
+    fi
+}
+
+task_running() {
+    locked "backup" "$backups_dir/in-progress"
+}
+
+commit() {
+    touch "$dest_dir"
+    mv "$dest_dir" "$backups_dir/$backup_version"
+    if [ -e "$latest_backup_dir" ]; then
+	rm "$latest_backup_dir" || die "Cannot remove $latest_backup_dir."
+    fi
+    ln -s "$backup_version" "$latest_backup_dir"
+}
+
+cleanup() {
+    rm -f -R "$backups_dir/in-progress"
+}
+

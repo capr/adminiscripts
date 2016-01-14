@@ -1,0 +1,24 @@
+#!/bin/bash (source!)
+#
+# services @ public
+#
+
+# backup storage (currently unavailable)
+#hdparm -W0 /dev/sdb >/dev/null
+#srv mount.backup2 up
+# public vpn server
+srv openvpn.s1udp1 up
+srv openvpn.s1tcp1 up
+srv dhcpd2 up
+# public name server
+srv named.public1 up
+# public ftp server
+srv ftpd1 up
+# gazolin website & supporting servers
+srv postfix up
+srv fb up
+srv httpd.gazolin1 up
+# storage exporting
+srv gfs.server.public up
+
+srv crond.public up

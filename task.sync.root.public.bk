@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+#
+#
+
+inherit task.sync.root
+
+profile=public
+dest_dir=/mnt/root.public.bk
+bw_limit_kbps=8192

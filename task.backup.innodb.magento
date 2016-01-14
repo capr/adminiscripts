@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# backup of innodb data file for mysqld.magento mysql server
+#
+
+inherit task.backup.innodb
+inherit subject.mysqld.magento
+
+# for task.backup
+backup_life_days=30
+backup_life_issues=20
+

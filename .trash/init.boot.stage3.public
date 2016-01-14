@@ -1,0 +1,14 @@
+#!/bin/bash (source!)
+#
+# critical services @ public
+#
+
+srv net.taps.s1 up
+srv net.bridge.br_s1 up
+srv net.if.br_s1 up
+srv named.local2 up
+srv net.if.synco up
+srv net.firewall.public.synco up
+srv sshd up
+srv ntpd2 up
+

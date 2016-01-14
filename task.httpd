@@ -1,0 +1,4 @@
+#!/bin/bash
+
+keydir=/etc/httpd/keys
+

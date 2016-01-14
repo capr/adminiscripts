@@ -1,0 +1,15 @@
+#!/bin/bash (source!)
+#
+# isp link: join telecom @ cosmin
+#
+
+inherit service.net.if
+
+eth=eth_jt
+mac=00:20:ed:2e:92:0a	# as ISP expects
+ip=89.33.182.82
+netmask=255.255.255.0
+broadcast=89.33.182.255
+gateway=89.33.182.1
+gateway_metric=2
+

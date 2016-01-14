@@ -1,0 +1,24 @@
+#!/bin/bash (source!)
+#
+# lighttpd server
+#	uses: $conf, $pid
+#
+
+inherit service
+
+service_start() {
+    lighttpd -f "$conf"
+}
+
+service_stop() {
+    kill_pidfile "$pid"
+}
+
+service_status() {
+    running_pidfile "$pid"
+}
+
+service_help() {
+    echo "start stop status restart help"
+}
+

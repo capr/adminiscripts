@@ -1,0 +1,9 @@
+#!/bin/bash
+#
+# Checks on our public DNS servers.
+#
+
+zones="gazolin.ro saysport.ro"
+master_servers="ns1.gazolin.ro ns2.gazolin.ro"
+authoritative_servers="$master_servers ns1.everydns.net ns2.everydns.net ns3.everydns.net ns4.everydns.net"
+

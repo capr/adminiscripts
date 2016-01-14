@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# file check script
+#	implements: what, short, info, search(), fix()
+#
+
+inherit task.check.files
+
+what="unowned files"
+short="U"
+info="Unowned files cannot be accessed by anyone but root, yet they weren't ment for root.
+Don't forget to check permission policies after taking ownership of these files."
+
+search() {
+    find "$1" -xdev \( -nouser -o -nogroup \)
+}
+
+fix() {
+    chown 0:0 "$1"
+}
+

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+inherit task.backup.myisam.gazolin_wiki
+
+backups_dir=/Files/backups2/databases/gazolin_wiki
+

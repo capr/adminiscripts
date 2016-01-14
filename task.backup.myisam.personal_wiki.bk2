@@ -1,0 +1,6 @@
+#!/bin/bash
+
+inherit task.backup.myisam.personal_wiki
+
+backups_dir=/Files/backups2/databases/personal_wiki
+

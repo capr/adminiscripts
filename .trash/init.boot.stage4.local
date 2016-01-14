@@ -1,0 +1,28 @@
+#!/bin/bash (source!)
+#
+# services @ local
+#
+
+# import public server's storage
+srv openvpn.c1udp up
+#srv gfs-mount.public.data.public up
+#srv gfs-mount.public.root.public.bk up
+# mount backup storage
+# TODO: make it by-label !!!
+hdparm -W0 /dev/sdb >/dev/null
+srv mount.backup1 up
+# intranet & personal wikis
+srv mysqld up
+srv httpd.intranet up
+# web development platform
+srv fbtest up
+srv httpd.gtest up
+# export storage to local and vpn windows clients
+srv smbd up
+# lan/internet access for local clients
+srv net.ipfw.comtel up
+srv net.portfw.cosmin-comtel up
+srv dhcpd1 up
+
+srv crond.local up
+

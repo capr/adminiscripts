@@ -1,0 +1,9 @@
+#!/bin/bash (source!)
+#
+# firewall @ public
+#
+
+inherit service.net.firewall.local
+
+eth=eth_jt
+

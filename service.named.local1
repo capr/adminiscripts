@@ -1,0 +1,11 @@
+#!/bin/bash (source!)
+#
+# local named server #1
+#
+#
+
+inherit service.named
+
+conf=/etc/named/named.local1.conf
+pid=/var/run/named.local1.pid  # as per conf file
+

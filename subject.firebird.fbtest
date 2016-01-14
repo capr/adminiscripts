@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+# gazolin fbtest server
+#
+# ATTN: keep this file private as it contains passwords!
+#
+
+FIREBIRD=/etc/firebird/fbtest
+host=fbtest.local
+username=sysdba
+inherit password.firebird.fbtest

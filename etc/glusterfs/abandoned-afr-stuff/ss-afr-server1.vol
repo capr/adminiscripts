@@ -1,0 +1,58 @@
+volume posix1
+    type storage/posix
+    option directory /mnt/sdb1/storage-afr
+end-volume
+
+volume posix2
+    type storage/posix
+    option directory /mnt/sda1/storage-afr
+end-volume
+
+volume afr				# 4:26 untar, 9:47 rm
+    type cluster/afr
+    subvolumes posix1 posix2
+end-volume
+
+volume iot				# 3:59 untar, 9:12 rm
+    type performance/io-threads
+    option thread-count 2		# set this to <= CPU count
+    option cache-size 32MB
+    subvolumes afr
+end-volume
+
+volume wb				# 4:02 untar, 9:42 rm
+    type performance/write-behind
+    option aggregate-size 0		# aggregates writes in chunks for reducing network calls
+    option flush-behind off		# does this mean fake flush? is it faster? is it safe?
+    subvolumes iot
+end-volume
+
+volume ra				# 4:02 untar, 9:46 rm
+    type performance/read-ahead
+    option page-size 128kB		# read-ahead in chunks
+    option page-count 2
+    option force-atime-update off	# on means huge perf. hit on reads
+    subvolumes wb
+end-volume
+
+volume ioc				# 5:44 untar, 12:12 rm
+    type performance/io-cache
+    option cache-size 32MB
+    option page-size 128kB
+    option priority *:0
+    option force-revalidate-timeout 1
+    subvolumes ra
+end-volume
+
+# this is stupid: you need auth.ip.<brick>.allow for all subvolumes involved too, even if the client never directly accesses them!
+volume server
+    type protocol/server
+    option transport-type tcp/server
+    option bind-address 127.0.0.1
+    option listen-port 6996
+    subvolumes ra
+    option auth.ip.g1.allow *
+    option auth.ip.g2.allow *
+end-volume
+
+

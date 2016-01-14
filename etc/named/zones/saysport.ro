@@ -1,0 +1,17 @@
+$ORIGIN .
+$TTL 1H
+saysport.ro		IN SOA	ns1.gazolin.ro. admin.gazolin.ro. (
+				2009022702 ; serial (yyyymmddnn)
+				1H         ; refresh (1H-2D) -- everydns.net updates every hour on the hour!
+				15M        ; retry (15M-1D)
+				4W         ; expire (1W-6W)
+				1H         ; minimum (15M-1W but 1H-3H recommended)
+				)
+			NS	ns1.gazolin.ro.
+			NS	ns1.everydns.net.
+			NS	ns2.everydns.net.
+			NS	ns3.everydns.net.
+			NS	ns4.everydns.net.
+			A	87.239.226.253
+$ORIGIN saysport.ro.
+www			CNAME	saysport.ro.

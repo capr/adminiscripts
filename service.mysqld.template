@@ -1,0 +1,12 @@
+#!/bin/bash (source!)
+#
+# mysqld server template
+# implements: $pid, $conf.
+# note: pid location as per the mysql conf file.
+#
+
+inherit service.mysqld
+
+conf=/etc/mysqld/$service.conf
+pid=/var/run/$service.pid
+

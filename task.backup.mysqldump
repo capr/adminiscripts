@@ -1,0 +1,19 @@
+#!/bin/bash (source!)
+#
+# backup a mysql database via mysqldump utility
+#	implements: 			backup
+#	uses from task.backup: 		$dest_dir
+#	uses from server subject: 	$host, $username, $password
+#	uses from db subject:		$db
+#
+# NOTE: the dump includes DROP/CREATE DATABASE statements to comply with restore.
+#
+
+inherit task.backup
+
+backup() {
+    say "Doing mysqldump backup of $db -> $dest_dir..."
+    mysqldump --host="$host" --user="$username" --password="$password" --lock-all-tables \
+		 --add-drop-database --databases --opt "$db" | gzip > "$dest_dir/backup.sql.gz"
+}
+

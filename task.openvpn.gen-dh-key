@@ -1,0 +1,8 @@
+#!/bin/bash
+
+inherit task.openvpn
+
+task_run() {
+    openssl dhparam -out ${KEY_DIR}/dh${KEY_SIZE}.pem ${KEY_SIZE}
+}
+

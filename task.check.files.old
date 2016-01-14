@@ -1,0 +1,133 @@
+#!/bin/bash
+#
+# task to verify and enforce layout-independent filesystem security policies.
+#	uses: $what, $short, $info, seach(), fix()
+#	implements: task_run(), find_files_in_list(list_file)
+#
+#
+#
+# BUG: replace make_executable_if()'s logic to comply with the policy!!
+# BUG: only regular files and directories are checked!!
+#
+# The facts about perm flags that the policies in this script are aware of:
+# - no perms affect root, so we don't care about any perms at all for root.
+# - owner perms are transparent to the owner, so we never care about owner perms.
+# - world perms bypass the perm system and should not be allowed whenever possible.
+# - that leaves group perms as the only place to think about sharing policies:
+#	- the group of a new file is decided by (in order):
+#		1) dir's group, if the sgid bit is set on the dir, or,
+#		2) owner's default group (as per /etc/groups), otherwise.
+#	- only the owner can change the group afterwards, and only to a group he/she belongs to.
+#	- the perms of a new file are decided by the umask of the owner (as per /etc/login.defs).
+#	- only the owner can change the perms afterwards, to whatever perms he/she likes.
+# - the execute (+x) bits are not perm flags, and there really should be just one bit instead of three.
+#
+# The permissions scheme was chosen for transparency (never need to chmod anything!) and security:
+# - 1) default umask for root = 027 (640/750, as per boot script) => all root's files are read-only by default.
+# - 2) default umask for regular users = 007 (660/770, as per login.defs) => all users file are write-by-group by default.
+# - 3) each user has its own private group => users can have private files without need to remove the group perms.
+# - 4) all root's dirs and public files belong to group 'public'; all users listed in passwd belong to group 'public'!
+#  	=> everyone can access the fs layout and see the public files without need to set the world-readable bit.
+# - 5) all users home directories belong to their private group => their files are private in their home.
+# - 6) setgid bit is set on all directories => all sharing semantics get to be location-based and inheritable.
+# - 7) each downgradable daemon has its own downgrade user and group and /var location => they don't see each other's files.
+#
+#
+
+# helper searcher to find files spec'ed in $file_list variable inherited from $1.
+# the entries in $file_list will be canonicized, but after that, links won't be followed!
+find_files_in_list() {
+    args "$@" file
+    if [ -r "$classes_path/$file" ]; then
+	cat "$classes_path/$file" |
+	    while read f; do
+		[ "$f" ] && f="$(readlink -f "$f")"
+		[ "$f" ] && find $f -xdev 2>/dev/null # let $f expand as it could contain wildcards!
+	    done
+    fi
+}
+
+# helper searcher that uses files returned by find_cmd minus files in optional exclude list files.
+# $dir will be canonicized, but after that, links won't be followed!
+find_files_with_exclude_list() {
+    args "$@" dir find_cmd exclude_list
+    local dir="$(readlink -f "$1")"
+    
+    if [ -r "$exclude_list" ]; then
+	# compute the difference between found files and excluded files using comm and sort!
+	comm -23 <($find_cmd "$dir" | sort) <(find_files_in_list "$exclude_list" | sort)
+    else
+	# just find the files without sort (much faster!)
+	$find_cmd "$dir"
+    fi
+}
+
+task_run() {
+    local dir="$1"
+    local find_cmd="$2"
+    local action_cmd="$3"
+    
+    [ "$action_cmd" == "" ] && action_cmd="echo"
+    
+    if [ "$dir" == "" -o "$find_cmd" == "" ]; then
+	error "Usage: tsk $task <dir> <find> [<action>]"
+	error "Pick <find> and <action> from the table below. The default action is '$action_cmd'."
+	error "The associated repair action can be executed by typing 'repair' for <action>."
+	error "You can execute all find commands in order by typing 'all' for <find>."
+	error " "
+	error "	[find]	[find]				[repair_action]"
+	for i in $(seq 0 ${#cmd_table[@]}); do
+	    error "	${cmd_table[i]}"
+	done
+	exit 1
+    fi
+    
+    local find_cmds=""
+    if [ "$find_cmd" == "all" ]; then
+	for i in $(seq 0 ${#cmd_table[@]}); do
+	    [ "${cmd_table[i]}" ] || continue
+	    args ${cmd_table[i]} p f a
+	    find_cmds="$find_cmds $p"
+	done
+    else
+	find_cmds="$find_cmd"
+    fi
+    
+    local t="$action_cmd"
+
+    for find_cmd in $find_cmds; do
+
+	# reset $action_cmd in loop
+	action_cmd="$t"
+
+	# lookup $find_cmd and maybe $action_cmd in $cmd_table
+	for i in $(seq 0 ${#cmd_table[@]}); do
+	    args ${cmd_table[i]} p f a
+	    if [ "$p" == "$find_cmd" -o "$f" == "$find_cmd" ]; then
+		find_cmd="$f"
+		[ "$action_cmd" == "repair" ] && action_cmd="$a"
+		local found=1
+		break
+	    fi
+	done
+    
+	[ "$found" ] || die "Invalid find command '$find_cmd'."
+
+	# get $what, $info, and $exclude_list by executing $find_cmd without arguments!
+	$find_cmd
+	say "Command: $find_cmd($dir) -> $action_cmd"
+	say "Searching for ${what}..."
+	for i in $(seq 0 ${#info[@]}); do
+	    [ "${info[i]}" ] && say "[Info] ${info[i]}"
+	done
+	
+	find_files_with_exclude_list "$dir" "$find_cmd" "$exclude_list" | 
+	while read f; do
+	    [ "$action_cmd" != "echo" ] && say "$f"
+	    $action_cmd "$f"
+	done
+
+    done
+
+}
+

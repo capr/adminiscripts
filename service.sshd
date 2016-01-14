@@ -1,0 +1,26 @@
+#!/bin/bash (source!)
+#
+# Local sshd
+#
+
+inherit service
+
+conf=/etc/sshd.conf
+pid=/var/run/sshd.pid	# per sshd.conf
+
+service_start() {
+    /bin/sshd -4 -f "$conf"
+}
+
+service_stop() {
+    kill_pidfile "$pid"
+}
+
+service_status() {
+    running_pidfile "$pid"
+}
+
+service_help() {
+    echo "start stop status restart help"
+}
+

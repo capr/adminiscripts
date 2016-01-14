@@ -1,0 +1,15 @@
+#!/bin/bash (source!)
+#
+# isp link: comtel supernet @ cosmin
+#
+
+inherit service.net.if
+
+eth=eth_comtel
+mac=00:0e:2e:56:ea:8d	# as ISP expects
+ip=193.254.61.19
+netmask=255.255.255.0
+broadcast=193.254.61.255
+gateway=193.254.61.1
+gateway_metric=1
+

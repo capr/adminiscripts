@@ -1,0 +1,8 @@
+services namespace.
+
+services are programs that are run by the `srv' ui.
+
+You can think of services as long-aquired resources.
+You aquire them with `srv <service> start' and release
+them with `srv <service> stop'.
+

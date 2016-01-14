@@ -1,0 +1,10 @@
+#!/bin/bash (source!)
+#
+# Local swap
+#
+
+inherit service.swap
+
+swap_file=/var/spool/swap-file1
+swap_file_size_mb=512
+

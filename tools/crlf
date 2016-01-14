@@ -1,0 +1,5 @@
+#!/bin/bash
+# transform CRLF -> LF in $1.
+
+tr -d '\r' < "$1" > "$1.no-line-feed" && cat "$1.no-line-feed" > "$1" && rm "$1.no-line-feed"
+

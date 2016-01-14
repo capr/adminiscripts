@@ -1,0 +1,6 @@
+#!/bin/bash
+
+inherit task.restore.mysqldump.magento2
+
+backups_dir=/Files/backups1/databases/magento2
+

@@ -1,0 +1,20 @@
+#
+# inittab configured for AdminScripts.
+#
+
+id:2:initdefault:
+
+L1:1:wait:/bin/init-event single
+L2:2345:wait:/bin/init-event boot
+L6:6:wait:/bin/init-event reboot
+L0:0:wait:/bin/init-event halt
+
+S:1:respawn:/bin/sulogin
+1:2345:respawn:/bin/agetty tty1 9600
+2:2345:respawn:/bin/agetty tty2 9600
+3:2345:respawn:/bin/agetty tty3 9600
+4:2345:respawn:/bin/agetty tty4 9600
+5:2345:respawn:/bin/agetty tty5 9600
+6:2345:respawn:/bin/agetty tty6 9600
+
+ca:12345:ctrlaltdel:/bin/init-event ctrlaltdel

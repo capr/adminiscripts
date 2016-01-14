@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+# service instance API
+#	implements: 
+#		{running|kill}_pidof <exe_name>
+#		{running|kill}_pidfile <file_name>
+#		{running|kill}_mount <mount_point>
+#	uses: none.
+#
+
+running_pidof() { 
+    local pid="$(pidof -s "$1")"
+    [ "$pid" ] && return 0
+    return 1
+}
+
+kill_pidof() { 
+    local pid="$(pidof -s "$1")"
+    if [ "$pid" ]; then
+	kill $pid
+	return $?
+    fi
+    return 0
+}
+
+running_pidfile() { 
+    local pid="$(cat "$1" 2>/dev/null)"
+    [ "$pid" ] && [ "$(skill -n $pid)" ] && return 0
+    [ "$2" == "clean" ] && rm "$1" 2>/dev/null
+    return 1
+}
+
+kill_pidfile() {
+    local pid="$(cat "$1" 2>/dev/null)"
+    if [ "$pid" ]; then
+	kill $pid
+	return $?
+    fi
+    return 0
+}
+
+running_mount() {
+    [ "$(cat /proc/mounts|grep $(readlink -f "$1"))" ] && return 0
+    return 1
+}
+
+kill_mount() {
+    umount -l -r "$1"
+}
+

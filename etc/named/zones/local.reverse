@@ -1,0 +1,113 @@
+#
+#### OUTDATED AND DISABLED SINCE IT HAS NO USE #######
+#
+$TTL 1H
+@			IN SOA	ns1 root (
+				2	; serial
+				1H	; refresh
+				5M	; retry
+				4W	; expire
+				1H	; minimum
+				)
+
+			NS	ns1.local.
+			NS	ns2.local.
+; internal services
+1.0			PTR	gw.local.
+2.0			PTR	ns1.local.
+3.0			PTR	ns2.local.
+4.0			PTR	smtp.local.
+7.0			PTR	ntp.local.
+7.0			PTR	time.local.
+10.0			PTR	mysql.local.
+11.0			PTR	intranet.local.
+12.0			PTR	gtest.local.
+13.0			PTR	ssl1.local.
+19.0			PTR	ssl2.local.
+14.0			PTR	samba.local.
+18.0			PTR	imap.local.
+
+; firebird servers
+21.0			PTR	fb.local.
+25.0			PTR	fbtest.local.
+
+; local known servers
+1.11			PTR	blackbox.local.
+2.11			PTR	yellowbox.local.
+
+; local and vpn known users
+1.1			PTR	ana.local.
+2.1			PTR	cosmin.local.
+2.1			PTR	woods.local.
+3.1			PTR	mircea.local.
+3.1			PTR	misha.local.
+7.1			PTR	dana.local.
+
+; local guest users
+1.2			PTR	guest1.local.
+2.2			PTR	guest2.local.
+3.2			PTR	guest3.local.
+4.2			PTR	guest4.local.
+5.2			PTR	guest5.local.
+6.2			PTR	guest6.local.
+7.2			PTR	guest7.local.
+8.2			PTR	guest8.local.
+9.2			PTR	guest9.local.
+10.2			PTR	guest10.local.
+11.2			PTR	guest11.local.
+12.2			PTR	guest12.local.
+13.2			PTR	guest13.local.
+14.2			PTR	guest14.local.
+15.2			PTR	guest15.local.
+16.2			PTR	guest16.local.
+17.2			PTR	guest17.local.
+18.2			PTR	guest18.local.
+19.2			PTR	guest19.local.
+20.2			PTR	guest20.local.
+21.2			PTR	guest21.local.
+22.2			PTR	guest22.local.
+23.2			PTR	guest23.local.
+24.2			PTR	guest24.local.
+25.2			PTR	guest25.local.
+26.2			PTR	guest26.local.
+27.2			PTR	guest27.local.
+28.2			PTR	guest28.local.
+29.2			PTR	guest29.local.
+30.2			PTR	guest30.local.
+31.2			PTR	guest31.local.
+32.2			PTR	guest32.local.
+
+; vpn guest users
+1.3			PTR	vpn1.local.
+2.3			PTR	vpn2.local.
+3.3			PTR	vpn3.local.
+4.3			PTR	vpn4.local.
+5.3			PTR	vpn5.local.
+6.3			PTR	vpn6.local.
+7.3			PTR	vpn7.local.
+8.3			PTR	vpn8.local.
+9.3			PTR	vpn9.local.
+10.3			PTR	vpn10.local.
+11.3			PTR	vpn11.local.
+12.3			PTR	vpn12.local.
+13.3			PTR	vpn13.local.
+14.3			PTR	vpn14.local.
+15.3			PTR	vpn15.local.
+16.3			PTR	vpn16.local.
+17.3			PTR	vpn17.local.
+18.3			PTR	vpn18.local.
+19.3			PTR	vpn19.local.
+20.3			PTR	vpn20.local.
+21.3			PTR	vpn21.local.
+22.3			PTR	vpn22.local.
+23.3			PTR	vpn23.local.
+24.3			PTR	vpn24.local.
+25.3			PTR	vpn25.local.
+26.3			PTR	vpn26.local.
+27.3			PTR	vpn27.local.
+28.3			PTR	vpn28.local.
+29.3			PTR	vpn29.local.
+30.3			PTR	vpn30.local.
+31.3			PTR	vpn31.local.
+32.3			PTR	vpn32.local.
+

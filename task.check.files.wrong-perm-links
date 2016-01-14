@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+# file check script
+#	implements: what, short, info, search(), fix()
+#
+
+inherit task.check.files
+
+what="symlinks with wrong permissions"
+short="PL"
+info="Symlinks should not have any effective permissions bits removed."
+
+search() {
+    find "$1" -xdev -type l ! -perm -go=rwx
+}
+
+fix() { 
+# we don't have lchmod installed...
+#    lchmod a+rwx "$1" 
+    echo "$1"
+}
+

@@ -1,0 +1,9 @@
+#
+# todo: implement this checker
+#
+
+#file			user	group	perms
+#------------------------------------------------------------------------------
+/etc/ssh/keys/*.key	root	root	2600
+/var/tmp		root	public	1770
+

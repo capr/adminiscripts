@@ -1,0 +1,63 @@
+#!/bin/bash (source!)
+#
+# pure-ftp service API (for anonymous, upload only ftp servers)
+#	uses: $pidfile, $bind_address
+#
+# SUMMARY:
+#	- listen only on $bind_address (-4, -S)
+#	- log only to syslog 'ftp' facility (the default)
+#	- DISABLED: log transfers to a log file (-O)
+# SERVICE/ANONYMOUS MODE (DISABLED in favor of auth. mode):
+#	- allow only anonymous sessions which are made in the name of "ftp" user/group (-e)
+#	- allow directory creation by anonymous users (-M)
+#	- disable chmod (-R)
+#	- dirs/files are created with the default umask of the ftp user (enforce with -U dirmask:filemask)
+#	- overwriting files creates file versions instead, so no data is lost (-r)
+#	- deleting by anonymous users is disabled (the default)
+#	- disk is full when it's 95% really full (-k)
+#	- bandwitdh is limited to M/s (-T)
+# SERVICE/AUTHENTICATED MODE:
+#	- allows only authenticated sessions using info from $passwdfile (-E -l puredb:<password-file>)
+#	- disable chmod (-R)
+#	- DISABLED: dirs/files are created with fixed 770/660 perms (-U dirmask:filemask)
+#	- overwriting files is allowed (the default)
+#	- deleting is allowed (the default)
+#	- disk quota is set in passwd file for each user
+#	- bandwidth quota is set in passwd file for each user
+# BEHAVIOR:
+#	- allows only non-encrypted connections (-Y 0, the default)
+#	- chmod is disabled (-R), instead files/dirs are created with the default umask of the ftp user
+#	- each client IP is limited to 10 simultaneous connections (-C)
+#	- drops idle connections after 2 hours (-I)
+#
+
+inherit service
+
+passwdfile=/etc/passwd.pureftpd
+transfile=/var/log/ftpd.transfers.log
+
+options="-B -H"
+#DISABLED: log="-O $transfile"
+limits="-C 10 -I 120"
+service_auth="-E -l puredb:$passwdfile -R"
+service_anon="-e -M -R -U 117:007 -r -k 100"
+# -T 6000"
+
+service_start() {
+    local listen="-4 -S $bind_address,21"
+    local pid="-g $pidfile"
+    pure-ftpd $options $listen $pid $log $limits $service_anon
+}
+
+service_stop() {
+    kill_pidfile "$pidfile"
+}
+
+service_status() {
+    running_pidfile "$pidfile"
+}
+
+service_help() {
+    echo "start stop status restart help"
+}
+

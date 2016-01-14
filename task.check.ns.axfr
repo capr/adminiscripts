@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+# Check if we can axfr our zones from our master servers.
+#
+
+inherit task.check.ns
+
+task_run() {
+    for d in $zones; do
+	for s in $master_servers; do
+	    dig "@$s" "$d" -t AXFR | grep "admin.gazolin.ro" | tail -1
+	done
+    done
+}
+

@@ -1,0 +1,37 @@
+#!/bin/bash (source!)
+#
+# UPS daemon
+#
+
+# todo: pid file is in /var/state/ups/upsd.pid
+
+inherit service
+
+user=root
+
+service_start() {
+    ln -s /var/run /var/state 2>/dev/null
+    mkdir -p /var/run/ups
+    # start ups driver
+    upsdrvctl -u $user start
+    # start the ups server
+    upsd -u $user
+}
+
+service_stop() {
+    kill_pidof upsd
+    upsdrvctl -u $user stop
+}
+
+service_status() {
+    running_pidof upsd
+}
+
+service_query() {
+    upsc myups@localhost
+}
+
+service_help() {
+    echo "start stop status restart query help"
+}
+

@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# sync gobolinux programs from a catalog to some destination.
+# only files for server functionality are copied, no files for user interaction or program building.
+#	implements: include_files(), $source, $dest
+#	uses: $profile: the name of the directory in ./gobo-programs-catalogs containing symlinks to programs to copy
+#	uses: $dest_dir
+#
+# BUG: old program versions are not deleted from destination and will accumulate.
+#
+
+inherit task.sync
+
+source=/1/src/
+dest=/1/dst/
+
+include_files() {
+    echo "/dir2"
+    echo "/dir2/**"
+    echo "/file1"
+}

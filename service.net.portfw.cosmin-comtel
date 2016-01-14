@@ -1,0 +1,12 @@
+#!/bin/bash (source!)
+#
+# port forwarding cosmin -> comtel.
+#
+
+inherit service.net.portfw
+
+host=cosmin.local
+gw=ip.comtel.local
+tcp_ports="13372"
+udp_ports="18602"
+

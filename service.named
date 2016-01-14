@@ -1,0 +1,31 @@
+#!/bin/bash (source!)
+#
+# named instance API
+#	uses:  $conf, $pid.
+#
+
+inherit service
+
+username=named
+rndc_conf=/etc/named/rndc.conf
+
+service_start() {
+    pushd /var/tmp >/dev/null; named -4 -u "$username" -c "$conf"; popd >/dev/null
+}
+
+service_stop() {
+    kill_pidfile "$pid"
+}
+
+service_status() {
+    running_pidfile "$pid"
+}
+
+service_help() {
+    echo "start stop status restart reload help gen_key get_root_file"
+}
+
+service_reload() {
+    rndc -c "$rndc_conf" reload
+}
+

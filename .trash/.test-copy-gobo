@@ -1,0 +1,23 @@
+#!/bin/sh
+
+. class
+
+catalog_dir="${classes_path}/gobo-catalogs/geode"
+    
+pushd "$catalog_dir" >/dev/null
+
+dst=/mnt/flash/Programs
+
+find * -maxdepth 0 -type l |
+    while read f; do
+	pd="$(readlink -f "$f")"
+	vd="$(readlink -f "$f/Current")"
+	for sd in bin sbin lib Shared; do
+	    if [ -d "$vd/$sd" ]; then
+	        cp -Rf --parents "$vd/$sd" "$dst"
+	    fi
+	done
+    done
+
+popd >/dev/null
+

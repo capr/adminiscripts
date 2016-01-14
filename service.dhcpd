@@ -1,0 +1,27 @@
+#!/bin/bash (source!)
+#
+# DHCPD service API 
+#	uses: $conf, $pid, $interface, $lease_file
+#
+
+inherit service
+
+service_start() {
+    modprobe ipv6
+    mkdir -p "$(dirname "$lease_file")"
+    touch "$lease_file"
+    dhcpd -q -pf "$pid" -cf "$conf" "$interface"
+}
+
+service_stop() {
+    kill_pidfile "$pid"
+}
+
+service_status() {
+    running_pidfile "$pid"
+}
+
+service_help() {
+    echo "start stop status restart help"
+}
+

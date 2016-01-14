@@ -1,0 +1,10 @@
+$TTL 4W ; 4 weeks
+@			IN SOA	@ root (
+				1       ; Serial
+				4W      ; Refresh 
+				1H      ; Retry
+				4W      ; Expire
+				4W)     ; Minimum TTL
+			IN NS	@
+			IN A	127.0.0.1
+

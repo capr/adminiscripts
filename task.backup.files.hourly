@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# hourly incremental backup of very important files
+#
+
+inherit task.backup.files
+
+catalog_dir="$classes_path/backup-catalogs/hourly"
+bw_limit_kbps=4096
+backup_life_days=7
+backup_life_issues=56
+

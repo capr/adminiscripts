@@ -1,0 +1,35 @@
+volume g1
+    type storage/posix                   
+    option directory /mnt/sdb1/g1        
+end-volume
+
+volume g2
+    type storage/posix
+    option directory /mnt/sdb1/g2
+end-volume
+
+volume g-ns
+    type storage/posix
+    option directory /mnt/sdb1/g-ns
+end-volume
+
+volume g-unify
+    type cluster/unify
+    subvolumes g1 g2
+    option namespace g-ns
+    option scheduler rr
+end-volume
+
+# this is stupid: you need auth.ip.<brick>.allow for all subvolumes involved too!!
+volume server
+    type protocol/server
+    option transport-type tcp/server
+    option bind-address 127.0.0.1
+    option listen-port 6996
+    subvolumes g-unify
+    option auth.ip.g1.allow *
+    option auth.ip.g2.allow *
+    option auth.ip.g-ns.allow *
+    option auth.ip.g-unify.allow *
+end-volume
+

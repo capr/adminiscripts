@@ -1,0 +1,8 @@
+event-handlers are programs installed in $PATH, that are executed (triggered)
+by external programs in response to various events.
+
+class			- called by standalone bash scripts via `. class'.
+init-event		- called by init, as per inittab.
+mysql-backup-event	- called by myisam backup tasks.
+pam-event		- called by PAM on login, etc.
+udev-event		- called by udev for new devices, etc.

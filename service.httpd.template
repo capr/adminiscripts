@@ -1,0 +1,12 @@
+#!/bin/bash (source!)
+#
+# apache server template
+#
+
+inherit service.httpd
+
+#in case you need the server name: local server="${service#httpd.}"
+
+conf="/etc/httpd/$service.conf"
+pid="/var/run/$service.pid"
+

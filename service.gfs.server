@@ -1,0 +1,25 @@
+#!/bin/bash (source!)
+#
+# GlusterFS posix server API
+#	uses: $vol_file, $vol_name, $pid, $log.
+#
+
+inherit service
+
+service_start() {
+    #TODO: log to syslog: glusterfsd -f "$vol_file" -n "$vol_name" -p "$pid" -L WARNING --log syslog --log-syslog-facility 
+    glusterfsd -f "$vol_file" -n "$vol_name" -p "$pid" -l "$log" -L WARNING 
+}
+
+service_stop() {
+    kill_pidfile "$pid"
+}
+
+service_status() {
+    running_pidfile "$pid" clean
+}
+
+service_help() {
+    echo "start stop status restart help"
+}
+

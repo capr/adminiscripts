@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# file check script
+#	implements: what, short, info, search(), fix()
+#
+
+inherit task.check.files
+
+what="files with a fixed, expected set of permissions"
+short="EP"
+info="Retarded programs like sudo or postfix are paranoid about the perms of some files."
+
+search() {
+    
+}
+
+fix() {
+
+}
+

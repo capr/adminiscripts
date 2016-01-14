@@ -1,0 +1,25 @@
+#!/bin/bash (source!)
+#
+# Local acpid
+#
+
+inherit service
+
+conf_dir=/etc/acpi/events
+
+service_start() { 
+    acpid -S -c "$conf_dir" >/dev/null
+}
+
+service_stop() {
+    kill_pidof acpid
+}
+
+service_status() {
+    running_pidof acpid
+}
+
+service_help() {
+    echo "start stop status restart help"
+}
+

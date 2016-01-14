@@ -1,0 +1,28 @@
+#!/bin/bash (source!)
+#
+# OpenVPN service API
+#	uses: $conf, $pid
+#
+
+inherit service
+
+service_start() {
+    openvpn --config "$conf"
+}
+
+service_stop() {
+    kill_pidfile "$pid"
+}
+
+service_status() {
+    running_pidfile "$pid" clean
+}
+
+service_help() {
+    echo "start stop status restart reload help"
+}
+
+service_reload() {
+    kill -SIGHUP `cat "$pid"`
+}
+

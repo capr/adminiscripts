@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# convert bmp files to png, deleting the source (since no information loss is possible)
+#
+
+inherit task.convert
+
+src_ext="bmp"
+dst_ext="png"
+imagick_options="-quality 0 -trim"
+delete_src=1
+

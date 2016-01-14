@@ -1,0 +1,36 @@
+#!/bin/sh
+#
+# convert files with imagemagick's convert command
+#	uses: $scan_dir or $1, $src_ext or $2, $dst_ext or $3, $imagick_options, $delete_src
+#
+
+task_run() {
+    [ "$scan_dir" ] || scan_dir="$1"
+    [ "$src_ext" ] || src_ext="$2"
+    [ "$dst_ext" ] || dst_ext="$3"
+
+    [ "$scan_dir" == "" -o "$src_ext" == "" -o "$dst_ext" == "" ] && die "Usage: tsk $task <scan_dir> <source_file_extension> <dest_file_extension>"
+
+    [ "$imagick_options" ] || imagick_options="-quality 100"
+
+    say "Scanning $scan_dir..."
+    find "$scan_dir/"* -depth -type f |
+        while read file
+	do
+	    fname="${file%.*}"
+	    fext="${file##*.}"
+	    fext="$(echo "$fext" | tr '[A-Z]' '[a-z]')"
+
+	    if [ "$fext" == "$src_ext" ]; then
+		say -n "Converting $file from $src_ext to $dst_ext..."
+		if convert $imagick_options "$file" "$fname.$dst_ext"; then
+		    #optipng takes too long... so we skip it
+		    #[ "$dst_ext" == "png" ] && optipng "$fname.png"
+		    [ "$delete_src" == "1" ] && rm "$file"
+		    say "OK"
+		fi
+	    fi
+	done
+
+}
+

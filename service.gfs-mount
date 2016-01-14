@@ -1,0 +1,25 @@
+#!/bin/bash (source!)
+#
+# GlusterFS client
+#	uses: $vol_file, $vol_name, $mount_point, $log, $pid
+#
+
+inherit service
+
+service_start() {
+    modprobe fuse
+    glusterfs -f "$vol_file" -l "$log" -L WARNING -n "$vol_name" -p "$pid" "$mount_point"
+}
+
+service_stop() {
+    kill_mount "$mount_point"
+}
+
+service_status() {
+    running_pidfile "$pid" clean && running_mount "$mount_point" && return 0
+    return 1
+}
+
+service_help() {
+    echo "start stop status restart help"
+}

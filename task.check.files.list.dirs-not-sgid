@@ -1,0 +1,10 @@
+#
+# dirs not allowed to be sgid.
+# globbing and symlinks accepted.
+#
+# files created in non-sgid dirs will be group-owned by user's primary group, which is its own private group,
+# therefore they will be completely protected files yet in a shared location, only subject to name clashes.
+#
+
+/var/tmp
+

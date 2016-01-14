@@ -1,0 +1,6 @@
+#!/bin/bash
+
+inherit task.backup.innodb.magento
+
+backups_dir=/Files/backups2/databases/mysqld_magento_innodb
+

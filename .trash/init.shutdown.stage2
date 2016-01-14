@@ -1,0 +1,21 @@
+#!/bin/bash (source!)
+#
+# stage2 shutdown. analog to init.boot.stage2.
+#
+
+srv net.if.lo down
+
+srv swap down
+
+# stop logging on the r/w filesystem
+#srv upsd down
+#srv sensord down
+srv smartd down
+srv bootlogd down
+srv syslogd down
+srv klogd down
+
+srv clock down
+
+srv "mount.data.$PROFILE" down
+

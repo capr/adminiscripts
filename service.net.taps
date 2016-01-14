@@ -1,0 +1,26 @@
+#!/bin/bash (source!)
+#
+# create tap interfaces
+#	requires: $taps (a list of tap interface names to create)
+#
+
+inherit service
+
+service_start() {
+    mkdir -p /dev/net
+    mknod /dev/net/tun c 10 200 2>/dev/null
+    for tap in $taps; do
+	openvpn --mktun --dev "$tap"
+    done
+}
+
+service_stop() {
+    for tap in $taps; do
+	openvpn --rmtun --dev "$tap"
+    done
+}
+
+service_help() {
+    echo "start stop restart help"
+}
+

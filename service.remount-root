@@ -1,0 +1,24 @@
+#!/bin/bash (source!)
+#
+# Remounting root r/w mode (reiserfs)
+#
+
+mount_options="noatime,barrier=flush,data=ordered"
+
+service_start() {
+    mount -o "rw,remount,$mount_options" /
+}
+
+service_stop() {
+    mount -o "ro,remount,$mount_options" /
+}
+
+service_status() {
+    [ "$(cat /proc/mounts|grep "/ reiserfs rw")" ] && return 0
+    return 1
+}
+
+service_help() {
+    echo "start stop status help"
+}
+

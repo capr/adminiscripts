@@ -1,0 +1,16 @@
+AdminScripts
+============================================================================
+Author:		Cosmin Apreutesei (cosmin.apreutesei@gmail.com)
+Copyright:	Cosmin Apreutesei (c) 2009
+License:	MIT (see LICENSE file)
+Homepage: 	http://code.google.com/p/adminscripts/
+
+
+AdminScripts is a minimalist, extensible framework for managing all the
+aspects of a linux server, except for package management, which is left
+entirely to the underlying distro.
+
+Please visit the project's website for up-to-date information and
+documentation on how to install and use this program.
+
+Feedback is welcome and appreciated.

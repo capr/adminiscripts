@@ -1,0 +1,6 @@
+#!/bin/bash
+
+inherit task.backup.files.hourly
+
+backups_dir=/Files/backups2/hourly
+

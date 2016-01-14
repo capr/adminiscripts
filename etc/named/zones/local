@@ -1,0 +1,109 @@
+$TTL 1H
+@			IN SOA	ns1 root (
+				20	; serial (just change it whenever zone changes)
+				1H	; refresh (for slaves: when to requery the master)
+				5M	; retry (for slaves: retry interval when the master is down)
+				4W	; expire (for slaves: ttl for stale zone)
+				1H	; minimum TTL
+				)
+			NS	ns1.local.
+			NS	ns2.local.
+; isp1
+gw.jt			A	89.33.182.1
+ns1.jt			A	89.33.190.53
+ns2.jt			A	89.33.190.129
+ip.jt			A	89.33.182.82
+
+; isp2
+gw.comtel		A	193.254.61.1
+ns1.comtel		A	193.230.184.2
+ns2.comtel		A	193.230.208.10
+ip.comtel		A	193.254.61.19
+
+; isp3
+gw.synco		A	87.239.226.1
+ns1.synco		A	81.181.0.1
+ns2.synco		A	81.181.214.1
+ip1.synco		A	87.239.226.253
+ip2.synco		A	87.239.226.254
+
+; public services @ public (map to isp)
+gazolin1		CNAME	ip1.synco	; gazolin production web server #1 (httpd.magento.conf, to be replaced with httpd.gazolin1.conf)
+gstatic			CNAME	ip2.synco	; gazolin production static file server
+ftp1			CNAME	ip1.synco	; public ftp server #1 (service.ftpd1)
+vpn1			CNAME	ip1.synco	; public vpn server #1 (openvpn/server.s1*1.conf)
+; local services @ public (10.123.0.x, br_s1 + aliases)
+public			A	10.10.0.2	; storage on public location (glusterfs/{server,client}.*.conf)
+ns2			A	10.10.0.2	; slave local dns (IP @ named.local2.conf, dhcpd1,2.conf)
+ntp2			A	10.10.0.2	; secondary ntp server (ntpd2.conf)
+ntp			A	10.10.0.2	; round-robin
+mysql-magento		A	10.10.0.2	; mysql server for magento apps
+mysql			CNAME	mysql-magento
+gazolin1-ssl		A	10.10.0.2	; gazolin ssl web server, isp #1 (httpd.gazolin1.conf, IP @ openvpn/server.s1tcp1.conf)
+fb			A	10.10.0.2	; production firebird server (fb/firebird.conf)
+smtp			A	10.10.0.2	; postfix smtp server (postifx/main.cf)
+; local services @ local (10.10.0.x, br_c1 + aliases)
+local			A	10.10.0.1	; storage on local location (glusterfs/{server,client}.*.conf)
+gw			A	10.10.0.1	; router (dhcpd1,2.conf)
+ns1			A	10.10.0.1	; master local dns (this file, IP @ named.local1.conf, dhcpd1,2.conf)
+ntp1			A	10.10.0.1	; primary ntp server (ntpd1.conf)
+ntp			A	10.10.0.1	; RR
+mysql-intranet		A	10.10.0.1	; mysql server for intranet apps
+intranet		A	10.10.0.1	; intranet web server (httpd.intranet.conf)
+intranet-ssl		A	10.10.0.1	; intranet ssl web server (httpd.intranet.conf)
+gtest			A	10.10.0.3	; gazolin test web server (httpd.gtest.conf)
+gtest-ssl		A	10.10.0.3	; gazolin test web server - ssl connections (httpd.gtest.conf)
+fbtest			A	10.10.0.1	; test firebird server (fbtest/firebird.conf)
+samba			A	10.10.0.1	; samba file server (smb.conf)
+mtest			A	10.10.0.2	; magento web server (httpd.mtest.conf)
+; aliases
+time			CNAME	ntp
+
+; local and vpn known users (10.0.1.x)
+ana			A	10.10.1.1
+cosmin			A	10.10.1.2
+woods			CNAME	cosmin
+mircea			A	10.10.1.3
+misha			CNAME	mircea
+ana-vpn			A	10.10.4.1
+cosmin-vpn		A	10.10.4.2
+mircea-vpn		A	10.10.4.3
+dana-vpn		A	10.10.4.4
+didi-vpn		A	10.10.4.5
+
+; local guest users (10.0.2.x)
+guest1			A	10.10.2.1
+guest2			A	10.10.2.2
+guest3			A	10.10.2.3
+guest4			A	10.10.2.4
+guest5			A	10.10.2.5
+guest6			A	10.10.2.6
+guest7			A	10.10.2.7
+guest8			A	10.10.2.8
+guest9			A	10.10.2.9
+guest10			A	10.10.2.10
+guest11			A	10.10.2.11
+guest12			A	10.10.2.12
+guest13			A	10.10.2.13
+guest14			A	10.10.2.14
+guest15			A	10.10.2.15
+guest16			A	10.10.2.16
+
+; vpn guest users (10.0.3.x)
+vguest1			A	10.10.3.1
+vguest2			A	10.10.3.2
+vguest3			A	10.10.3.3
+vguest4			A	10.10.3.4
+vguest5			A	10.10.3.5
+vguest6			A	10.10.3.6
+vguest7			A	10.10.3.7
+vguest8			A	10.10.3.8
+vguest9			A	10.10.3.9
+vguest10		A	10.10.3.10
+vguest11		A	10.10.3.11
+vguest12		A	10.10.3.12
+vguest13		A	10.10.3.13
+vguest14		A	10.10.3.14
+vguest15		A	10.10.3.15
+vguest16		A	10.10.3.16
+

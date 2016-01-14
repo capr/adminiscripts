@@ -1,0 +1,11 @@
+#!/bin/bash (source!)
+#
+# firewall @ public
+#
+
+inherit service.net.firewall
+
+tcp_ports=""
+udp_ports=""
+blocked_ips=""
+

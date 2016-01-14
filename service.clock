@@ -1,0 +1,19 @@
+#!/bin/bash (source!)
+#
+# clock drifting
+#
+
+service_start() {
+    # load the clock
+    hwclock --adjust --localtime
+    hwclock --hctosys --localtime
+}
+
+service_stop() {
+    hwclock --systohc --localtime
+}
+
+service_help() {
+    echo "start stop"
+}
+

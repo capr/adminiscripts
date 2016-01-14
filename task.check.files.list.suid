@@ -1,0 +1,10 @@
+#
+# files allowed to be suid/sgid.
+# globbing and symlinks accepted, although globbing here is not a good idea.
+#
+
+/bin/sudo
+/bin/ping
+/bin/postdrop
+/bin/postqueue
+

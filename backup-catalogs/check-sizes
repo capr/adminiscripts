@@ -1,0 +1,13 @@
+#!/bin/bash
+
+catalogs="hourly daily xls-files"
+
+for catalog in $catalogs; do
+    echo "Checking '$catalog' catalog..."
+    find "$catalog"/* -maxdepth 0 -type l |
+	while read link; do
+	    item="$(readlink "$link")"
+	    # only directories are counted because that's also how the backup works
+	    [ -d "$item" ] && du -shx "$item"
+	done
+done

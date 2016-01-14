@@ -1,0 +1,12 @@
+#!/bin/bash (source!)
+#
+# openvpn c1 client bridge alias
+#
+
+inherit service.net.if
+
+eth=br_c1:0
+ip=10.10.0.3
+netmask=255.255.0.0
+broadcast=10.10.255.255
+

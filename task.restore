@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+# restore task API driver, complement to the backup driver.
+#	implements:
+#		task_run, task_running
+#		$src_dir				the directory where the backup files are
+#	uses from implementors:
+#		restore					the restore worker procedure
+#	uses from subjects:
+#		$backups_dir				directory of all backups
+#	uses from the tsk front-end:
+#		$1					the backup version from which to perform the restore.
+#
+# NOTES:
+# - $backups_dir is an aquired resource during restore, so you can't have two restore processes at the same time on it.
+#
+
+inherit locking
+
+syslog_facility=news
+
+#TODO: implement usage in tsk: usage="[<backup-version>]"
+
+task_run() {
+    assert_var backups_dir
+    src_dir="$1"
+    [ "$src_dir" ] || src_dir="latest-backup"
+    src_dir="$backups_dir/$src_dir"
+    [ -d "$src_dir" ] || die "No directory $src_dir"
+    
+    trap cleanup SIGINT SIGTERM SIGQUIT SIGABRT EXIT
+    aquire_lock "restore" "$backups_dir"
+    
+    say "STARTING restore from '$src_dir'..."
+    if restore; then
+	say "SUCCESS."
+    else
+	error "FAILED with code $?."
+	return 1
+    fi
+}
+
+task_running() {
+    locked "restore" "$backups_dir"
+}
+
+cleanup() {
+    release_lock "restore" "$backups_dir"
+}
+

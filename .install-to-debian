@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# install admin-scripts debian
+# 
+
+src="$(pwd)"
+dest=/usr/local/bin
+
+mkdir -p "$dest"
+for f in `ls bin`; do
+    ln -s "$src/bin/$f" "$dest/$f" 
+done

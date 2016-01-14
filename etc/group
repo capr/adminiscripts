@@ -1,0 +1,88 @@
+#
+# types of groups: users' private groups, resource access groups, special groups.
+# - types of users' private groups: root's, daemons', humans'. the idea is not to share them with anyone.
+# - types of resource access groups: file, device, service. the idea is to partition and share the access to resources.
+# - special groups: anybody = contains anyone; nobody = contains no one.
+#
+# with sharing between deamons and users, there are two configurations:
+#	1) the daemon sees nothing but its private files with <daemon>:<daemon> ownership, but some power users
+#	have access to the daemon's private group and thus they are the masters of the daemons.
+#	2) the daemon is part of some file access group, thus it can opt to have really private files.
+#
+
+# root's private group: replacement for -orwx  -- never include anyone!
+root:x:0:fibo
+# public group: replacement for +orwx flags -- don't forget to include everyone!
+public:x:100:root,nobody,fibo,smbguest,postfixp,sshd,named,ntpd,postfix,ftp,gfcgi,fb,fbtest,httpd_intranet,httpd_gazolin,httpd_gtest,httpd_magento,httpd_mtest,httpd_gstatic,mysqld_intranet,mysqld_magento,cosmin,mircea,oana,dana,didi
+
+# needed by udev
+nobody:x:2:
+
+# daemons' private groups: power users *may* be part of some of those groups if required.
+fibo:x:21:
+smbguest:x:11:
+postfixp:x:12:
+sshd:x:22:
+postfix:x:32:
+openvpn:x:50:
+named:x:1014:
+ntpd:x:1003:
+# the ftp group acts as a file access group, actually
+ftp:x:1025:cosmin,mircea,dana,oana,didi
+gfcgi:x:1050:
+fb:x:1051:
+fbtest:x:1052:
+httpd_intranet:x:1053:
+httpd_gazolin:x:1054:
+httpd_gtest:x:1055:
+httpd_magento:x:1056:cosmin,mircea
+httpd_mtest:x:1057:cosmin,mircea
+httpd_gstatic:x:1058:cosmin,mircea
+mysqld_intranet:x:1061:
+mysqld_magento:x:1062:
+
+# humans' private groups: don't allow anyone into those groups -- create specific file sharing groups instead.
+mircea:x:1004:
+cosmin:x:1005:
+oana:x:1006:
+dana:x:1024:
+didi:x:1027:
+
+# file access groups: use those and only those for file sharing semantics!
+# shared files between all human users
+users:x:1000:cosmin,mircea,oana,didi,dana,httpd_intranet
+# shared files between human gazolin users + the gazolin fastcgi wrapper
+gazolin:x:2001:cosmin,mircea,oana,gfcgi
+
+# device access groups
+kmem:x:3:
+tty:x:4:
+tape:x:5:
+floppy:x:7:
+cdrom:x:1023:
+cdrecord:x:102:
+disk:x:8:
+lp:x:9:
+audio:x:11:
+video:x:103:
+dialout:x:10:
+messagebus:x:50:
+plugdev:x:52:
+
+# TODO: remove?
+haldaemon:x:51:
+rpcuser:x:1011:
+
+# service access groups
+ssh:x:1019:root,cosmin
+smbhosts:x:101:
+
+# TODO: what is this??
+postdrop:x:33:postfix,root,nobody
+
+# compatibility groups (see if you can delete them!)
+bin:x:1:
+uucp:x:1022:
+sys:x:2:root,fibo
+wheel:3:root,fibo
+

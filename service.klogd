@@ -1,0 +1,27 @@
+#!/bin/bash (source!)
+#
+# Local klogd
+#
+# NOTE: starting klogd disables displaying any kernel messages on the console
+#
+
+inherit service
+
+system_map=/boot/System.map
+
+service_start() {
+    klogd -c 1 -k "$system_map"
+}
+
+service_stop() {
+    kill_pidof klogd
+}
+
+service_status() {
+    running_pidof klogd
+}
+
+service_help() {
+    echo "start stop status restart help"
+}
+

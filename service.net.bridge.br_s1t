@@ -1,0 +1,10 @@
+#!/bin/bash (source!)
+#
+# bridge s1 tap interfaces together
+#
+
+inherit service.net.bridge
+
+bridge=br_s1t
+ifs="tap_s1tcp1 tap_s1udp1 eth_local"
+

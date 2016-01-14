@@ -1,0 +1,10 @@
+#!/bin/bash (source!)
+#
+# stage1 shutdown. analog to init.boot.stage1.
+#
+
+# stop acpid daemon
+srv acpid down
+
+# stop udev server
+srv udevd down

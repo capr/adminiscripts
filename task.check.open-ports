@@ -1,0 +1,9 @@
+#!/bin/bash
+#
+# checking for open ports
+#
+
+task_run() {
+    netstat -l 
+}
+

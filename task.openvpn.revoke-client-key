@@ -1,0 +1,10 @@
+#!/bin/bash
+
+inherit task.openvpn
+
+task_run() {
+    local key="$1"
+    [ "$key" ] || die "Usage: $@ <key base name>"
+    "$EASY_RSA/revoke-full" $key
+}
+

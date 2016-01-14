@@ -1,0 +1,31 @@
+#!/bin/bash
+#
+# file check script
+#	implements: what, short, info, search(), fix()
+#
+
+inherit task.check.files
+
+what="wrong executable bits"
+short="X"
+info="For executable files (incl. dirs), there should be an +x bit for each +r bit not more not less."
+
+search() {
+    find "$1" -xdev \( -perm /ugo=x -o -type d \) \( \
+		        \( -perm -u=r ! -perm -u=x \) -o \
+		        \( -perm -g=r ! -perm -g=x \) -o \
+		        \( -perm -o=r ! -perm -o=x \) -o \
+		        \( -perm -u=x ! -perm -u=r \) -o \
+		        \( -perm -g=x ! -perm -g=r \) -o \
+		        \( -perm -o=x ! -perm -o=r \) \)
+}
+
+fix() { 
+    local mod=""
+    [ "$(find "$1" -maxdepth 0 -perm -u=r)" ] && mod="${mod}u"
+    [ "$(find "$1" -maxdepth 0 -perm -g=r)" ] && mod="${mod}g" 
+    [ "$(find "$1" -maxdepth 0 -perm -o=r)" ] && mod="${mod}o"
+    chmod ugo-x "$1"
+    [ "$mod" ] && chmod "${mod}+x" "$1"
+}
+

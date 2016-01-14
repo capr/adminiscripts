@@ -1,0 +1,27 @@
+#!/bin/bash (source!)
+#
+# services @ public
+#
+
+## TODO: finish this (reverse the list etc.)......
+
+# backup storage (currently unavailable)
+#hdparm -W0 /dev/sdb >/dev/null
+#srv mount.backup2 up
+# public vpn server
+srv openvpn.s1udp1 down
+srv openvpn.s1tcp1 down
+srv dhcpd2 down
+# public name server
+srv named.public1 down
+# public ftp server
+srv ftpd1 down
+# gazolin website & supporting servers
+srv postfix down
+srv fb down
+srv httpd.gazolin1 down
+# local storage exporting
+srv gfs.server.public down
+
+srv crond.public down
+

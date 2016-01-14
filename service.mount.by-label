@@ -1,0 +1,13 @@
+#!/bin/bash (source!)
+#
+# Local storage (mount-by label)
+#	uses: $device_label
+#
+
+inherit service.mount
+
+set_vars() {
+    device="/dev/disk/by-label/$device_label"
+    mount_point="/mnt/$device_label"
+}
+

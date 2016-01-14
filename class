@@ -1,0 +1,121 @@
+#!/bin/bash (source!)
+#
+# AdminScripts base API; also bash sourcing event handler.
+#	implements:
+#		$classes_path, $class
+#		inherit <script_name>
+#		args $@ <arg_var1> ...
+#		in_list <str> <list>
+#		push_chain, chained <command>, pop_chain
+#
+#
+# NOTE: This file is sourced by ev.init in a totally virgin environment created by init(8) (no variables, 
+# no /proc, nothing!). So watch out for what you execute in the main body (you can use whatever you like in functions).
+#
+# BUGS: lookup() works only with FQDNs!
+#
+#
+
+# tells you which class (file) are you in at the moment. changed on each call to inherit().
+class="class"
+# use it to find supporting files in the classes directory.
+classes_path="$(dirname "$(readlink -f "$(which "$class")")")"
+
+### language extensions ###
+
+inherit() {
+    local cclass="$class"
+    class="$1"
+    . "$classes_path/$1" || error "Could not inherit $1 [$?]"; 
+    class="$cclass"
+}
+
+# args: "$@" name1 name2 ...; you will get name1=$1, name2=$2, etc.
+function args() {
+    shopt -s expand_aliases
+    shopt -u expand_aliases
+    local entries middle i
+    entries=("$@")
+    (( middle=$#/2 ))
+    for (( i = 0 ; i < middle; i++ )); do
+	eval ${entries[$[middle+i]]}'="'"${entries[$i]}"'"'
+    done
+}
+
+### string functions ###
+
+token_pos() {
+    args "$@" str list
+    local c=1
+    for s in $list; do
+	if [ "$str" == "$s" ]; then
+	    echo "$c"
+	    return 0
+	fi
+	c=$[c+1]
+    done
+    return 1
+}
+
+token_at() {
+    args "$@" index list
+    local c=1
+    for s in $list; do
+	if [ $index == $c ]; then
+	    echo "$s"
+	    return 0
+	fi
+	c=$[c+1]
+    done
+    return 1
+}
+
+in_list() {
+    token_pos "$@" >/dev/null
+}
+
+### array functions ###
+
+elem_pos() {
+    args "$@" str array
+    for i in $(seq 0 ${#array[@]}); do
+	if [ "$str" == "${array[i]}" ]; then
+	    echo $i
+	    return 0
+	fi
+    done
+    return 1
+}
+
+in_array() {
+    elem_pos "$@" >/dev/null
+}
+
+### network functions ###
+
+lookup() {
+    local text="$(host "$1")" || return $?
+    echo "${text#*has address}"
+}
+
+### ways to run a command ###
+
+# TODO: impmenent a stack of chains
+push_chain() { chain_broken=""; }
+
+chained() {
+    if [ -z "$chain_broken" ]; then
+	"$@"; local ret=$?
+	[ $ret != 0 ] && chain_broken=1
+	return $ret
+    fi
+    return 1
+}
+
+pop_chain() {
+    [ "$chain_broken" ] && return 1
+    return 0
+}
+
+inherit logging
+

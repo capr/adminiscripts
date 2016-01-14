@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+#
+#
+
+inherit task.sync.root
+
+profile=local
+dest_dir=/mnt/root.local
+bw_limit_kbps=8192
+

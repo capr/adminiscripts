@@ -1,0 +1,37 @@
+#
+# files that must have root:root ownership.
+# globbing and symlinks accepted.
+#
+# list here all files containing passwords and keys.
+# list root's home dir too, since it contains shell hostory and whatnot.
+#
+
+/lib/udev/devices/console
+
+/etc/shadow
+/etc/shadow-
+/etc/gshadow-
+/etc/gshadow
+
+/etc/pureftpd.passwd
+
+/etc/named/keys/*.key
+
+/etc/httpd/keys/*.key
+
+/etc/openvpn/keys/*.key
+/etc/openvpn/keys/dh1024.pem
+
+/etc/ssh/keys/*.key
+
+/etc/firebird/SYSDBA.password
+/etc/firebird/security2.fdb
+
+/etc/postfix/certs/gazolin.ro.key.pem
+
+/Programs/AdminScripts/Current/subject.firebird.fb
+/Programs/AdminScripts/Current/subject.firebird.fbtest
+/Programs/AdminScripts/Current/subject.mysql.intranet
+
+/home/root
+

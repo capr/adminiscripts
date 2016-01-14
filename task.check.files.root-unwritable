@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+# file check script
+#	implements: what, short, info, search(), fix()
+#
+
+inherit task.check.files
+
+what="known root's files that must be writable"
+short="RUW"
+info="Some well known of root's files must be writable."
+
+search() {
+    find_files_in_list "task.check.files.list.root-writable" |
+	while read f; do
+	    find "$f" -maxdepth 0 -xdev ! -perm -g=w
+	done
+}
+
+fix() {
+    chmod g+w "$1"
+}
+

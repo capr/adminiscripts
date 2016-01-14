@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+# file check script
+#	implements: what, short, info, search(), fix()
+#
+
+inherit task.check.files
+
+what="unknown suid/sgid files"
+short="SUID"
+info="Suid/sgid executables delegate the responsibility for security to program code.
+Only a few known files should be allowed these bits."
+
+exclude_list="task.check.files.list.suid"
+
+search() {
+    find "$1" -xdev -type f -perm +6000
+}
+
+fix() {
+    chmod -s "$1"
+}
+

@@ -1,0 +1,14 @@
+#!/bin/bash (source!)
+#
+# stage1 boot (essential, profilable, safe)
+#
+
+hostname sandbox.local
+
+# C locale
+export LANG=en_US
+export LC_ALL=en_US
+export TZ="Europe/Bucharest"
+
+# fuse is needed by unionfs-fuse, which is needed by SandboxInstall
+modprobe fuse

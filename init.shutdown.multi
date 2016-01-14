@@ -1,0 +1,17 @@
+#!/bin/bash (source!)
+#
+# analog to init.boot.multi
+#
+
+inherit init
+
+init_vars
+
+if [ "$PROFILE" ]; then
+    say "Shutting down [$PROFILE]..."
+    inherit "init.profile.$PROFILE.shutdown"
+else
+    error "No profile to shutdown."
+fi
+
+inherit init.shutdown.stage0

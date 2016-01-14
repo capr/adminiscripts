@@ -1,0 +1,40 @@
+#!/bin/bash
+
+checkers=(
+    broken-links
+    wrong-perm-links
+    unowned
+    suid-unknown
+    suid-writable 
+    world-access
+    wrong-owner-bits
+    unreadable
+    root-writable
+    root-unwritable
+    user-unwritable
+    root-non-public
+    root-unprotected
+    600
+    wrong-exe-bits
+    dirs-not-sgid
+)
+
+task_run() {
+    args "$@" dir action
+    [ "$verbose" ] && verbose_opt="-v"
+
+    if [ "$dir" == "" ]; then
+	error "Usage: tsk [-v | --verbose] $task <dir> [fix]"
+	error "Installed checkers:"
+	for c in ${checkers[*]}; do
+	    error "	check.files.$c"
+	done
+	exit 1
+    fi
+
+    for c in ${checkers[*]}; do
+	[ "$verbose" ] || echo "[check.files.$c] $action"
+	[ "$c" ] && tsk $verbose_opt "check.files.$c" "$dir" "$action"
+    done
+}
+

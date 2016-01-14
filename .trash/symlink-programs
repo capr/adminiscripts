@@ -1,0 +1,14 @@
+#!/bin/sh
+
+pdir=/mnt/flash/Programs
+ddir=/mnt/flash/System
+
+pushd "$pdir" >/dev/null
+
+find * -maxdepth 0 |
+    while read d; do
+	RescueSymlinkProgram "$pdir/$d/Current" "$ddir"
+    done
+
+popd >/dev/null
+

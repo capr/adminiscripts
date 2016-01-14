@@ -1,0 +1,25 @@
+#!/bin/bash (source!)
+#
+# Init API
+# 	implements: $verbose, $debug, $PROFILE, init_vars, shelldrop
+#
+#
+
+inherit kcmdline
+
+# make it 0 to mute all `say' calls
+verbose=1
+
+# needs /proc
+init_vars() {
+    kcmdline_arg debug && debug=1
+    export PROFILE="$(kcmdline_arg profile)"
+}
+
+shelldrop() {
+    if [ "$debug" ]; then
+	echo "Debug shell $@"
+	bash
+    fi
+}
+

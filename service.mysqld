@@ -1,0 +1,28 @@
+#!/bin/bash (source!)
+#
+# mysqld service
+# uses: $conf, $pid
+#
+# NOTE: use --skip-grant-tables to bypass _all_ security systems (i.e. user/password/host/db checking)
+# this is useful for resetting passwords or debugging.
+#
+
+inherit service
+
+service_start() {
+    #skip_grant_tables="--skip-grant-tables"
+    mysqld_safe --defaults-file="$conf" $skip_grant_tables >/dev/null &
+}
+
+service_stop() {
+    kill_pidfile "$pid"
+}
+
+service_status() {
+    running_pidfile "$pid"
+}
+
+service_help() {
+    echo "start stop status restart help"
+}
+

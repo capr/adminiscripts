@@ -1,0 +1,14 @@
+#!/bin/bash (source!)
+#
+# script to generate rndc keys for named
+#
+
+keys_dir=/etc/named/keys
+
+task_run() {
+    pushd
+    cd "$keys_dir"
+    dnssec-keygen -b 512 -a HMAC-MD5 -v 2 -n HOST "$1"
+    popd
+}
+

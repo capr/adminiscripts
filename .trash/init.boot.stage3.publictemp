@@ -1,0 +1,20 @@
+#!/bin/bash (source!)
+#
+# critical services @ publictemp
+#
+
+srv net.taps.s1 up
+srv net.bridge.br_s1t up
+srv net.if.br_s1t up
+srv net.if.br_s1t.alias0 up
+srv net.if.br_s1t.alias1 up
+srv net.if.br_s1t.alias2 up
+srv named.local1 up
+srv named.local2 up
+srv net.if.synco up
+srv net.if.synco.alias0 up
+srv net.firewall.public.synco up
+
+srv sshd up
+srv ntpd1 up
+

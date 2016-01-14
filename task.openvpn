@@ -1,0 +1,4 @@
+#!/bin/bash
+
+. /etc/openvpn/easy-rsa.conf
+

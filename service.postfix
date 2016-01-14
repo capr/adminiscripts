@@ -1,0 +1,60 @@
+#!/bin/bash (source!)
+#
+# Postfix server serving as gazolin's website mail sender
+#
+# BUGS: stupid postfix shows greeting on stderr
+#
+
+inherit service
+
+tables_src_dir=/etc/postfix/tables
+tables_dst_dir=/var/db/postfix/tables
+
+do_postmap() {
+    newaliases
+    ls "$tables_src_dir" | while read i; do
+	if [ "$i" != "aliases" -a "${i##*.}" == "$i" ]; then
+	    mkdir -p "$tables_dst_dir"
+	    ln -fs "$tables_src_dir/$i" "$tables_dst_dir/$i"
+	    postmap "$tables_dst_dir/$i"
+	fi
+    done
+}
+
+service_start() {
+    do_postmap
+    
+    #as per main.conf
+    local pd="/var/postfix-special-dir"
+    mkdir -p "$pd"
+    chown postfix:postfix "$pd"
+    chmod 770 "$pd"
+    
+    postfix start 2>/dev/null
+}
+
+service_stop() {
+    postfix stop 2>/dev/null
+}
+
+service_status() {
+    postfix status 2>/dev/null
+}
+
+service_reload() {
+    do_postmap
+    postfix reload
+}
+
+service_check() {
+    postfix check
+}
+
+service_version() {
+    postconf mail_version
+}
+
+service_help() {
+    echo "start stop status restart help reload check version"
+}
+

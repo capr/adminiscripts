@@ -1,0 +1,59 @@
+#!/bin/bash
+#
+# task controller for published tasks (i.e. from ./tasks)
+#	implements:
+#		$task		; the name of the task
+#		$verbose	; used by say(), see the `logging` module
+#	uses:
+#		task_run(<cmd-line args>) -> return_code	; the actual task routine
+#		task_running() -> 1 = already running; 0 = not running or it doesn't matter
+#			concrete tasks must implement this check to prevent parallel execution of tasks
+#
+
+. class
+inherit cmdline
+
+# cmdline config
+script_name="Task controller"
+script_version="1.0"
+script_usage="[-v | --verbose] [-f | --force] [-h --help] [<task-name> [parameters]]"
+script_description="Task controller for published tasks (i.e. task classes in ./tasks)"
+# cmdline config
+cmdline_add_boolean "v" "verbose" "Show progress info"
+cmdline_add_boolean "f" "force" "Force running task even if already running"
+cmdline_help_if_no_args=1
+cmdline_parse "$@"
+# parse cmdline
+tasks_dir="$classes_path/tasks"
+task="$(cmdline_arg 1)"
+params="$(cmdline_args 2)"
+cmdline_option verbose && verbose=1
+
+out_prefix="[$task]: "
+
+# without any cmdline args, `list` is assumed
+[ -z "$task" ] && task="list"
+# `list` is a special argument to list available tasks
+[ "$task" = "list" ] && {
+    pushd "$tasks_dir" >/dev/null
+    find * -maxdepth 0 -type l
+    popd >/dev/null
+    exit
+}
+# check if the task exists
+[ -f "$tasks_dir/$task" ] || die "Unknown task. Type 'tsk list' for a list of available tasks."
+
+# by default, lie by saying that the task is already running. concrete tasks must reimplement this.
+task_running() { return 1; }
+
+inherit "tasks/$task"
+
+if ! cmdline_option force; then
+    task_running && die "Already running."
+fi
+
+task_run $params; ret=$?
+[ $ret = 0 ] || die "Failed [$ret]."
+say "OK"
+exit $ret
+

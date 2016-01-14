@@ -1,0 +1,10 @@
+#!/bin/bash (source!)
+#
+# Local crond
+#	uses: service as "crond.<name>"
+#
+
+inherit service.crond
+
+crontab_dir="/etc/cron.d.${service#crond.}"
+

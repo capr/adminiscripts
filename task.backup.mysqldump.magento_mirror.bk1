@@ -1,0 +1,6 @@
+#!/bin/bash
+
+inherit task.backup.mysqldump.magento_mirror
+
+backups_dir=/Files/backups1/databases/magento_mirror
+

@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# file check script
+#	implements: what, short, info, search(), fix()
+#
+
+inherit task.check.files
+
+what="broken symlinks"
+short="BL"
+info="Broken symlinks can signal interrupted paths due to lack of permissions along the path."
+
+search() {
+    find "$1" -xdev -type l ! -exec test -r {} \;
+}
+
+fix() {
+    rm "$1"
+}
+

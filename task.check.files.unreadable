@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# file check script
+#	implements: what, short, info, search(), fix()
+#
+
+inherit task.check.files
+
+what="files unreadable within group"
+short="UG"
+info="All files (with a few notable exceptions) should be group-readable."
+exclude_list="task.check.files.list.root-600"
+
+search() {
+    find "$1" -xdev ! -perm -g=r
+}
+
+fix() {
+    chmod g+r "$1"
+}
+

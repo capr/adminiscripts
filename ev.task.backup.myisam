@@ -1,0 +1,27 @@
+#!/bin/bash 
+#
+# mysql backup script event handler: copy a file from $1 to $2, linking
+# against $3 (using rsync --link-dest).
+# to be called only by myisam backup tasks.
+#
+
+src="$1"
+dest="$2"
+link_dest="$3"
+
+[ "$src" = "" -o "$dest" = "" ] && exit 1
+[ -d "$link_dest" ] && opt_link_dest="--link-dest="$link_dest""
+
+## ATTN: $src is usually a link, that's why the trailing slash
+
+zip -qrj "$dest/backup.zip" "$src/"
+
+#alternatives:
+# rsync -a $opt_link_dest "$src/" "$dest"
+# cp -R "$src" "$dest"
+# tar -czf "$dest/backup.tar.gz" "$src/"
+
+# we gotta echo the result to get it from mysql
+err="$?"
+echo "$err"
+

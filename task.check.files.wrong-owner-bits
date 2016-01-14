@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# file check script
+#	implements: what, short, info, search(), fix()
+#
+
+inherit task.check.files
+
+what="files with missing owner access bits"
+short="O"
+info="This check has no effect, but for consistency, the owner should have the +rw bits set."
+
+search() {
+    find "$1" -xdev ! -perm -u=rw
+}
+
+fix() {
+    chmod u+rw "$1"
+}
+

@@ -1,0 +1,25 @@
+#
+# Crontab file for blackbox.
+#
+# SUMMARY:
+#	- hourly backups happen on the hour, so hourly-saved databases are saved on the half-hour.
+#	- likewise, daily backups happen at 4:00am, so daily-saved databases are saved just an hour before.
+#
+
+# MINUTE HOUR DAY MONTH DAY-OF-WEEK COMMAND
+
+# hourly
+0 * * * * tsk backup.files.hourly.bk1
+0 * * * * tsk backup.files.hourly.bk2
+30 * * * * tsk backup.gazolin-database
+
+# daily
+0 3 * * * tsk backup.personal-wiki-database
+0 3 * * * tsk backup.gazolin-wiki-database
+0 3 * * * tsk backup.firebird-wiki-database
+0 4 * * * tsk backup.files.daily.bk1
+0 4 * * * tsk backup.files.daily.bk2
+
+# monthly
+0 4 1 * * tsk named.get-hints-file
+

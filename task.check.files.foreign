@@ -1,0 +1,26 @@
+#!/bin/bash
+#
+# file check script
+#	implements: what, short, info, search(), fix()
+#
+
+inherit task.check.files
+
+what="files owned by someone else"
+short="FF"
+info="See that no one else holds files inside some location, and take ownership."
+usage="<user> <group>, where * means any"
+
+### TODO: finish this !!!!
+
+search() {
+    [ "$1" ] || 
+    find "$1" -xdev -type l ! -perm -go=rwx
+}
+
+fix() { 
+# we don't have lchmod installed...
+#    lchmod a+rwx "$1" 
+    echo "$1"
+}
+

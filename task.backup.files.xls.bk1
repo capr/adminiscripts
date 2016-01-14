@@ -1,0 +1,6 @@
+#!/bin/bash
+
+inherit task.backup.files.xls
+
+backups_dir=/Files/backups1/xls-files
+

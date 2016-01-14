@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+# file check script
+#	implements: what, short, info, search(), fix()
+#
+
+inherit task.check.files
+
+what="root's private files not in root group"
+short="RPR"
+info="Some well known files should be root:root."
+
+search() {
+    find_files_in_list "task.check.files.list.root-private" |
+	while read f; do
+	find "$f" -maxdepth 0 -xdev \( ! -user 0 -o ! -group 0 \)
+	done
+}
+
+fix() {
+    chown 0:0 "$1"
+}
+

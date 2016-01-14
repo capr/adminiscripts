@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# sync gobolinux installation to the geode cf card
+#
+#
+
+inherit task.sync.gobo
+
+profile=geode
+dest="/mnt/LX800"
+#bw_limit_kbps=8192
+testmode=1
+task_run() { 
+include_files; 
+echo $source
+echo $dest
+}

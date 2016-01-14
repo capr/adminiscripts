@@ -1,0 +1,62 @@
+#
+# GlusterFS client config
+# Just rename as 'client' the volume you want to be used by the service 'gfs-client'.
+#
+
+volume rposix1
+    type protocol/client
+    option transport-type tcp/client
+    option remote-host gfs1.local
+    option remote-subvolume posix
+end-volume
+
+volume rposix2
+    type protocol/client
+    option transport-type tcp/client
+    option remote-host gfs2.local
+    option remote-subvolume posix
+end-volume
+
+volume afr
+    type cluster/afr
+    option debug on
+    option self-heal off
+    subvolumes rposix1 rposix2
+end-volume
+
+volume locks
+    type features/posix-locks
+    subvolumes afr
+end-volume
+
+volume iot
+    type performance/io-threads
+    option thread-count 2		# set this to <= CPU count
+    option cache-size 32MB
+    subvolumes locks
+end-volume
+
+volume wb
+    type performance/write-behind
+    option aggregate-size 0		# aggregates writes in chunks for reducing network calls
+    option flush-behind off		# does this mean fake flush? is it faster? is it safe?
+    subvolumes iot
+end-volume
+
+volume client
+    type performance/read-ahead
+    option page-size 128kB		# read-ahead in chunks
+    option page-count 2
+    option force-atime-update off	# on gets huge perf. hit on reads
+    subvolumes wb
+end-volume
+
+volume ioc
+    type performance/io-cache
+    option cache-size 32MB
+    option page-size 128kB
+    option priority *:0
+    option force-revalidate-timeout 1
+    subvolumes client
+end-volume
+

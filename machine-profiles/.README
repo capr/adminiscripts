@@ -1,0 +1,9 @@
+this is a config dir used by task.sync.gobo to synchronize machines.
+
+layout.all				gobolinux root partition layout common to all machines.
+layout.$profile				gobolinux root partition layout specific to a machine profile.
+programs.current-version.all		common programs needed on all machines, taken from current version on this machine.
+programs.current-version.$profile	additional programs needed by a certain machine profile, taken from current version on this machine.
+programs.specific-version.$profile	additional programs especially compiled for a certain machine profile.
+
+

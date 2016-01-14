@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# file check script
+#	implements: what, short, info, search(), fix()
+#
+
+inherit task.check.files
+
+what="files that don't obey sgid bit on the parent"
+short="PL"
+info="Directories with sgid bit set should have all their children inherit their group."
+
+########## TODO: FINISH THIS!! ###################
+
+search() {
+    find "$1" -xdev -type d -perm /g+s -printf "%G	%p\n" |
+	while read g f; do
+	    find "$f/" ! -group "$g"
+	done
+}
+
+fix() { 
+# we don't have lchmod installed...
+#    lchmod a+rwx "$1" 
+    echo "$1"
+}
+

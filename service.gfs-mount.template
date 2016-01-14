@@ -1,0 +1,21 @@
+#!/bin/bash (source!)
+#
+# GlusterFS client for importing storage @ public
+#	uses: $service formatted as "gfs-mount.<server>.<device-label>"
+#
+# BUGS: no dots in the <server> part please!
+#
+
+inherit service.gfs-mount
+
+local server="${service#gfs-mount.}"; server="${server%%.*}"
+
+vol_file="/etc/glusterfs/client.$server.vol"
+
+vol_name="${service#gfs-mount.*.}"
+
+mount_point="/mnt/$vol_name"
+
+log="/var/log/gfs-mount.$server.$vol_name.log"
+pid="/var/run/gfs-mount.$server.$vol_name.pid"
+

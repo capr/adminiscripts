@@ -1,0 +1,28 @@
+#!/bin/bash (source!)
+#
+# Mount service API
+#	uses: set_vars, $device, $mount_point, $mount_options
+#
+
+inherit service
+
+service_start() {
+    set_vars
+    mkdir -p "$mount_point"
+    mount "$device" "$mount_point" -o $mount_options
+}
+
+service_stop() {
+    set_vars
+    kill_mount "$mount_point"
+}
+
+service_status() {
+    set_vars
+    running_mount "$mount_point"
+}
+
+service_help() {
+    echo "start stop status restart help"
+}
+

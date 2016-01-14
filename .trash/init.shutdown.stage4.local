@@ -1,0 +1,28 @@
+#!/bin/bash (source!)
+#
+# services @ local
+#
+
+srv root down
+
+srv crond.local down
+
+# lan/internet access for local and vpn clients
+srv dhcpd1 down
+srv net.portfw.cosmin-comtel down
+srv net.ipfw.comtel down
+# storage for local and vpn clients
+srv smbd down
+# web development platform
+srv fbtest down
+srv httpd.gtest down
+# intranet & personal wikis
+srv mysqld down
+srv httpd.intranet down
+# backup storage
+srv mount.backup1 down
+# public server's storage
+#srv gfs-mount.public.root.public.bk down
+#srv gfs-mount.public.data.public down
+srv openvpn.c1udp down
+

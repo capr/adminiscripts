@@ -1,0 +1,10 @@
+#!/bin/bash (source!)
+#
+# LX800 boot profile
+#
+
+# list services in the booting order. will shutdown in reverse order.
+services=(
+    
+)
+

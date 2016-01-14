@@ -1,0 +1,24 @@
+#!/bin/bash (source!)
+#
+# apache service API
+#	uses: $conf, $pid
+#
+
+inherit service
+
+service_start() {
+    httpd -k start -f "$conf"
+}
+
+service_stop() {
+    httpd -k stop -f "$conf"
+}
+
+service_status() {
+    running_pidfile "$pid"
+}
+
+service_help() {
+    echo "start stop status restart help"
+}
+

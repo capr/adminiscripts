@@ -1,0 +1,11 @@
+#!/bin/bash (source!)
+#
+# public named server #2
+#
+#
+
+inherit service.named
+
+conf=/etc/named/named.public2.conf
+pid=/var/run/named.public2.pid  # as per conf file
+

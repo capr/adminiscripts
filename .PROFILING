@@ -1,0 +1,10 @@
+
+- boot profile name passed to kernel cmdline arg `profile'
+    -> init.boot.multi loads init.boot.multi.$profile
+	-> profile boot script starts only specific services
+
+- machine profile name passed to task.sync.gobo
+    -> task.sync.gobo syncs program files using the machine-profiles dir
+    -> task.sync.gobo symlinks hardcoded file locations ???
+    -> 
+

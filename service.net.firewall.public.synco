@@ -1,0 +1,9 @@
+#!/bin/bash (source!)
+#
+# firewall @ public
+#
+
+inherit service.net.firewall.public
+
+eth=eth_synco
+

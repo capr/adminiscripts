@@ -1,0 +1,58 @@
+#!/bin/sh
+#
+# sync gobolinux programs from a 
+# only files for server functionality are copied, no files for user interaction or program building.
+#	implements: include_files(), $source
+#	uses: $dest, $profile
+#
+
+inherit task.sync
+
+source=/Programs
+program_dirs="bin sbin lib Shared Resources Settings"
+
+include_layout() {
+    echo "$classes_path/machine-profiles/layout.$1/"
+    echo "$classes_path/machine-profiles/layout.$1/**"
+}
+
+include_programs_on_current_version() {
+    pushd "$classes_path/machine-profiles/programs.current-version.$1" >/dev/null
+    find * -maxdepth 0 -type l |
+	while read program; do
+	    local pdir="$(readlink -f "$program/Current")"
+	    for d in $program_dirs; do
+		echo "$pdir/$d"
+		echo "$pdir/$d/**"
+	    done
+	done
+    popd >/dev/null
+}
+
+include_programs_on_specific_version() {
+    pushd "$classes_path/machine-profiles/programs.specific-version.$1" >/dev/null
+    find * -maxdepth 0 -type d |
+	while read program; do
+	    local pdir="$(readlink -f "$program")"
+	    for d in $program_dirs; do
+		echo "$pdir/$d"
+		echo "$pdir/$d/**"
+	    done
+	done
+    popd >/dev/null
+}
+
+include_files() {
+    #include_layout all
+    include_programs_on_current_version all
+    include_programs_on_current_version "$profile"
+    include_programs_on_specific_version "$profile"
+}
+
+symlink_programs() {
+    echo "TODO: implement SymlinkProgram on destination"
+}
+
+post_sync() {
+    symlink_programs
+}

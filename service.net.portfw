@@ -1,0 +1,35 @@
+#!/bin/bash (source!)
+#
+# port forwarding service
+#	uses: $host, $gw, $udp_ports, $tcp_ports
+#
+# TODO: implement status
+#
+
+inherit service
+
+do_it() {
+    local gw_ip=$(lookup $gw) || die "Host $gw not found. Can't $2 port forwarding for $host -> $gw."
+    local host_ip=$(lookup $host) || die "Host $host not found. Can't $2 port forwarding for $host -> $gw."
+
+    for port in $tcp_ports; do
+        iptables -t nat $1 PREROUTING -d $gw_ip -p tcp --dport $port -j DNAT --to-destination $host_ip
+    done
+	    
+    for port in $udp_ports; do
+        iptables -t nat $1 PREROUTING -d $gw_ip -p udp --dport $port -j DNAT --to-destination $host_ip
+    done
+}
+
+service_start() {
+    do_it -A "set"
+}
+
+service_stop() {
+    do_it -D "remove"
+}
+
+service_help() {
+    echo "start stop restart help"
+}
+

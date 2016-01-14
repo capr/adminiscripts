@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+# backup of gazolin's operations database
+#
+
+inherit task.backup.firebird
+inherit subject.firebird.fb
+
+# for task.backup
+backup_life_days=7
+backup_life_issues=56
+
+# for task.backup.firebird: database subject
+db=gazolin_prod
+

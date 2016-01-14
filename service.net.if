@@ -1,0 +1,28 @@
+#!/bin/bash (source!)
+#
+# network interface init/shutdown
+#	uses: $eth (optional alias!), $mac (optional), $ip, $netmask, $broadcast, $gateway (optional), $gateway_metric.
+#
+# TODO: once MACs are changed, they don't get set back on stop (so keep them in some file and put them back)
+# TODO: implement status!
+#
+
+inherit service
+
+service_start() {
+    [ "$mac" ] && local macopt="hw ether $mac"
+    ifconfig $eth $macopt $ip netmask $netmask broadcast $broadcast up
+    [ "$gateway" ] && route add default gateway $gateway metric $gateway_metric dev $eth
+    return 0
+}
+
+service_stop() {
+    [ "$gateway" ] && route del default gw $gateway
+    ifconfig $eth 0.0.0.0 down
+    return 0
+}
+
+service_help() {
+    echo "start stop restart help"
+}
+

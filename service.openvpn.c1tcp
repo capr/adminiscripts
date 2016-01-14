@@ -1,0 +1,10 @@
+#!/bin/bash (source!)
+#
+# vpn tcp client
+#
+
+inherit service.openvpn
+
+conf=/etc/openvpn/client.c1tcp.conf
+pid=/var/run/openvpn.c1tcp.pid # as per conf file
+

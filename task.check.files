@@ -1,0 +1,77 @@
+#!/bin/bash
+#
+# task to verify and enforce layout-independent filesystem security policies.
+#	uses: $what, $short, $info, $exclude_list, seach(dir, options), fix(file, options)
+#	implements for task ui: task_run()
+#	implements for file checkers: find_files_in_list(list_file)
+#
+# The facts about perm flags that the checker scripts are aware of:
+# - no perms affect root, so we don't care about root not seeing anything because of perms.
+# - owner perms are transparent to the owner, so we don't care about owner perms.
+# - world perms bypass the perm system and should never be allowed.
+# - that leaves group perms as the only place to think about sharing policies (we are be better off without uo+rwx bits):
+#	- the group of a new file is decided by (in order):
+#		1) dir's group, if the sgid bit is set on the dir, or,
+#		2) user's primary group (as per /etc/groups), otherwise, but we shouldn't have non-sgid directories anyway.
+#	- only the owner can change the group afterwards, and only to a group he/she belongs to.
+#	- the perms of a new file are decided by the umask of the owner (as per /etc/login.defs).
+#	- only the owner can change the perms afterwards, to whatever perms he/she likes.
+# - the ugo+x bits are not perm flags (except for suid programs), and there really should be just one bit instead of three.
+#
+# The permissions scheme was chosen for transparency (never need to chmod anything!) and security:
+# - 1) default umask for root = 027 (640/750, as per boot script) => all root's files are read-only by default.
+# - 2) default umask for regular users = 007 (660/770, as per login.defs) => all users file are group-writable by default.
+# - 3) each user has its own private group => users can have private files without needing to chmod.
+# - 4) all root's dirs and public files belong to group 'public'; *all* users listed in passwd are in group 'public'!
+#  	=> everyone can access the fs layout and see the public files without need for world-access (o+) bits.
+# - 5) all users home directories belong to their private group => their files are private in their home without chmod.
+# - 6) setgid bit is set on all directories => all sharing semantics are location-based and inheritable.
+# - 7) each downgradable daemon has its own user and group and tmp has sgid bit cleared => they don't see each other's files.
+#
+
+# note: the entries in the file list will be canonicized, but after that, links won't be followed!
+find_files_in_list() {
+    args "$@" file
+    [ -r "$classes_path/$file" ] || die "List file $classes_path/$file not found or not readable."
+    cat "$classes_path/$file" |
+	while read f; do
+	    if [ "$f" -a "${f:0:1}" != "#" ]; then
+		f="$(readlink -f "$f")"
+		find $f -maxdepth 0 -xdev 2>/dev/null # let $f expand as it could contain wildcards!
+	    fi
+	done
+}
+
+task_run() {
+    args "$@" dir action
+    [ "$dir" == "" ] && die "Usage: tsk [-v | --verbose] $task <dir> [fix]"
+    if [ "$action" ]; then
+	action="fix"; shift 2
+    else
+	action="echo"; shift 1
+    fi
+    local options="$@"
+    
+    # note it's important to canonicize dir, since the files in exclude lists are also canonicized!
+    dir="$(readlink -f "$dir")"
+    
+    say "Searching for $what in $dir..."
+    say "[Info] $info"
+    [ "$exclude_list" ] && say "Note: files listed in '$exclude_list' are excluded."
+    
+    {
+	if [ "$exclude_list" ]; then
+	    # compute the difference between searched files and excluded files using comm and sort!
+	    comm -23 <(search "$dir" $options | sort) <(find_files_in_list "$exclude_list" | sort)
+	else
+	    # just find the files without sort (much faster!)
+	    search "$dir" $options
+	fi
+    
+    } | while read f; do
+	    [ "$action" != "echo" ] && say "$f"
+	    $action "$f" $options
+	done
+
+}
+

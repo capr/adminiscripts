@@ -1,0 +1,18 @@
+#!/bin/sh
+#
+# parse kernel cmdline. needs /proc.
+#
+
+# args: <arg_name>
+kcmdline_arg() {
+    for i in `cat /proc/cmdline`; do
+	key=`echo $i | cut -d= -f1`
+	val=`echo $i | cut -d= -f2`
+	if [ "$key" = "$1" ]; then
+	    echo "$val"
+	    return 0
+	fi
+    done
+    return 1
+}
+

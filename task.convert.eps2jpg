@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# convert eps to jpg preserving the source
+#
+
+inherit task.convert
+
+src_ext="eps"
+dst_ext="jpg"
+imagick_options="-quality 90 -trim"
+delete_src=0
+

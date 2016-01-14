@@ -1,0 +1,44 @@
+#!/bin/bash
+#
+# task to allow or deny a host to access a mysql database.
+# implements: task_run
+# uses from cmdline: $access_db, $access_host
+#
+# NOTE: you can use '%' for host which means "any host".
+# NOTE: you can only use this script for a server listening on 127.0.0.1 -- this might not be obvious.
+#
+# NOTE that in the author's oppinion, any host-based access scheme is false security
+# and mysql should allow users to bypass this entirely, so you should blame mysql for the
+# waste of time it makes to maintain and use this script.
+#
+
+inherit task.mysqld
+
+task_run() {
+    usage="Usage: allow|deny {<db> | %} {<host> | %}"
+    allowdeny="$1"
+    access_db="$2"
+    access_host="$3"
+    
+    [ "$allowdeny" != "allow" -a "$allowdeny" != "deny" ] && die $usage
+    [ -z "$access_db" -o -z "$access_host" ] && die $usage 
+
+    #
+    # TODO! FINISH THIS !!!
+    # 
+    
+    if [ "$allowdeny" == "allow" ]; then
+	sql_cmd="insert into db (host, db) values ('$access_host', '$access_db'); \
+	        insert into user (host, db) values ('$access_host', '$access_db'); \
+		flush privileges;"
+    elif [ "$allowdeny" == "deny" ]; then
+	sql_cmd="delete from db where host='$access_host' and db='$access_db'; \
+	        delete from user where host='$access_host' and db='$access_db'; \
+	        flush privileges;"
+    else
+	bug
+    fi
+
+    echo "$sql_cmd" | mysql --host=127.0.0.1 --user=root --database=mysql
+}
+

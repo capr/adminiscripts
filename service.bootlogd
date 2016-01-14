@@ -1,0 +1,32 @@
+#!/bin/bash (source!)
+#
+# Local bootlogd (doesn't really log much)
+#
+# BUGS: 
+#	bootlogd returns 1 but starts, and displays no error message (so I assume it starts ok).
+#	bootlogd doesn't remove its pid file.
+#
+
+inherit service
+
+log=/var/log/console.log
+pid=/var/run/bootlogd.pid
+
+service_start() {
+    bootlogd -l "$log" -p "$pid"; ret=$?
+    [ "$ret" == "1" ] && return 0
+    return 1 
+}
+
+service_stop() {
+    kill_pidfile "$pid"
+}
+
+service_status() {
+    running_pidfile "$pid" clean
+}
+
+service_help() {
+    echo "start stop status restart help"
+}
+

@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+# mysql server subject
+#
+# NOTE: make this a private file as it contains passwords.
+#
+
+sname=magento
+inherit subject.mysqld.template
+
+username=root
+inherit password.mysqld.magento
+

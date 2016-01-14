@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+# backup of gazolin's wikka database
+#
+
+inherit task.backup.myisam
+inherit subject.mysqld.intranet
+
+# for task.backup
+backup_life_days=7
+backup_life_issues=3
+
+# for task.backup.myisam
+db=gazolin_wiki
+

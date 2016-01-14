@@ -1,0 +1,36 @@
+#!/bin/bash (source!)
+#
+# Local swap.
+#	uses: $swap_file, $swap_file_size_mb
+#
+
+inherit service
+
+swap_file=`readlink -f "$swap_file"`
+
+service_start() {
+    if [ ! -f "$swap_file" -o "$(stat -c %s "$swap_file" 2>/dev/null)" != "$((swap_file_size_mb*1024*1024))" ]
+    then
+    	echo "Warning: swap file not found or not of the right size. Recreating..."
+	touch "$swap_file"
+	chmod go-rw "$swap_file"
+	dd if=/dev/zero of="$swap_file" bs=1024 count=$((1024*$swap_file_size_mb))
+	mkswap "$swap_file"
+    fi
+    swapon "$swap_file"
+    return $?
+}
+
+service_stop() {
+    swapoff "$swap_file"
+    return $?
+}
+
+service_status() {
+    [ "$(cat /proc/swaps | grep "$swap_file")" != "" ] && return 0; return 1
+}
+
+service_help() {
+    echo "start stop status restart help"
+}
+

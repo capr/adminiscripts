@@ -1,0 +1,377 @@
+#!/bin/bash (source)
+#
+# cmdline parser (stolen from GoboLinux' OptionParser)
+# implements:
+#	cmdline_add{_option|_boolean|_entry|_list} <type> <short-form> <long-form> <description> [<default value> [<possible values>]]
+#	cmdline_parse <cmdline, i.e $@>
+#	cmdline_arg <n>, cmdline_arg_count, cmdline_args <start> [<length>]
+#	cmdline_option <short/long-form> [<match-value>], cmdline_options [<short/long-form> ...]
+# uses:
+#	$script_name
+#	$script_version
+#	$script_usage
+#	$script_examples
+#	$script_credits
+#	$script_description
+#	$cmdline_help_if_no_args
+#
+
+declare -a savedOptions
+
+optionsListSize=0
+argumentsListSize=0
+parsedArguments=0
+
+function cmdline_init_script_vars() {
+    [ -z "$script_name" ] && script_name="$(basename "$0")"
+}
+
+# args: <type> <short-form> <long-form> <description> [<default value> [<possible values>]]
+# type ::= boolean|entry|list
+function cmdline_add_option() {
+    local i
+    for i in `seq $optionsListSize`; do
+	if [ "$3" = "${optionsShortList[i]}" -o "$4" = "${optionsLongList[i]}" ]; then
+	    bug "option name -$3 --$4 conflicts with -${optionsShortList[i]} --${optionsLongList[i]}."
+	fi
+    done
+    optionsListSize=$[optionsListSize+1]
+    # Add the option's attributes to our arrays.
+    optionsTypeList[$optionsListSize]="$1"        # type
+    optionsStateList[$optionsListSize]="$2"       # default value
+    optionsShortList[$optionsListSize]="$3"       # shortening
+    optionsLongList[$optionsListSize]="$4"        # full name
+    optionsDescriptionList[$optionsListSize]="$5" # description
+    optionsValidStateList[$optionsListSize]="$6"  # possible values
+}
+
+# args: <short-form> <long-form> <description>
+function cmdline_add_boolean() {
+    cmdline_add_option "boolean" "" "$@"
+}
+
+# args: <short-form> <long-form> <description> [<default value> [<possible values>]]
+function cmdline_add_entry() {
+    if [ "$4" ]; then
+	cmdline_add_option "entry" "$4" "$1" "$2" "$3" "$5"
+    else
+	cmdline_add_option "entry" "#@unset@#" "$1" "$2" "$3"
+    fi 
+}
+
+# args: <shor-form> <long-form> <description> [<default value>]
+function cmdline_add_list() {
+    if [ "$4" ]; then
+	cmdline_add_option "list" "$4" "$1" "$2" "$3"
+    else
+	cmdline_add_option "list" "#@unset@#" "$1" "$2" "$3"
+    fi
+}
+
+function cmdline_add_arg() {
+    argumentsList[$argumentsListSize]="$1"
+    argumentsListSize=$[argumentsListSize+1]
+}
+
+# args: <position>
+function cmdline_arg() {
+    # Bounds check: 0 <= <position> < argumentsListSize.
+    if [ $1 -lt 0 ] || [ $1 -ge $argumentsListSize ]; then
+	echo ""
+    else
+	echo "${argumentsList[$1]}"
+    fi
+}
+
+function cmdline_arg_count() {
+    # $0 isn't considered an argument
+    echo $[argumentsListSize-1]
+}
+
+# args: <start> [<length>]; returns arguments from <start> to <length> or end
+function cmdline_args() {
+    local start=1; [ "$1" ] && start="$1"
+    local length=$[argumentsListSize-1]; [ "$2" ] && length="$2"
+    local i=$start
+    length=$[$length+$start]
+    for (( ; i<$length ; i++ )); do
+	echo -n "${argumentsList[$i]} "
+    done
+    echo
+}
+
+# args: { <short-form> | <long-form> } [<match-value>]
+# always return 3 if option doens't exist, 2 if option has no value
+# if <match-value> given, return 1 if value doesn't match, 0 if it matches
+# if no <match-value> given, for a boolean-type option return 1 if value is "off" and 0 if it's "on"
+# if no <match-value> given, for an entry or a list-type option return 0 end echo the value
+function cmdline_option() {
+    local value
+    local i
+    for i in `seq $optionsListSize`; do
+	if [ "$1" = "${optionsShortList[i]}" -o "$1" = "${optionsLongList[i]}" ]; then
+	    value="${optionsStateList[i]}"
+	    [ "$value" = "#@unset@#" ] && return 2
+	    if [ "$2" ]; then
+		[ "$2" = "$value" ] && return 0
+		return 1
+	    fi
+	    if [ "${optionsTypeList[i]}" = "boolean" ]; then
+		[ "$value" = "on" ] && return 0
+		return 1
+	    else
+		echo "$value"
+		return 0
+	    fi
+	fi
+    done
+    return 3
+}
+
+# args: [<short/long-form> ...]
+# return a list of selected options and their values (useful on calling this same script with different options)
+function cmdline_options() {
+    local options
+    local value
+    local i
+    local o
+    if [ -z "$1" ]; then
+	for ((i=1; i<=$optionsListSize; i++)); do
+	    value="${optionsStateList[i]}"
+	    [ "$value" != "#@unset@#" ] && options="$options -${optionsShortList[i]} $value"
+	done
+    else
+	for o in "$1"; do
+	    for ((i=1; i<=$optionsListSize; i++)); do
+		if [ "${optionsShortList[i]}" = "$o" -o "${optionsLongList[i]}" = "$o" ]; then
+		    value=" ${optionsStateList[i]}"
+		    [ "$value" != "#@unset@#" ] && options="$options -${optionsShortList[i]} $value"
+		fi
+	    done
+	done 
+    fi
+    echo "$options"
+}
+
+function cmdline_show_version() {
+    cmdline_init_script_vars
+    echo "$script_name $script_version"
+    echo
+    [ "$script_credits" ] && echo "$script_credits"
+    exit 0
+}
+
+function cmdline_show_help() {
+    {
+	cmdline_init_script_vars
+	local i
+	# Print out a little description for the script, together with the usage.
+	[ "$script_description" ] && echo "$script_description"
+	echo
+	echo -e "Usage: $script_name $script_usage"
+	echo
+	echo "Options:"
+      
+        for i in `seq $optionsListSize`; do
+	    # Indent and print the shortening, if any.
+	    echo -n "   "
+	    [ ! -z "${optionsShortList[i]}" ] && echo -n " -${optionsShortList[i]}"
+	    # Put a comma to separate shortening and full name, if any.
+            [ ! -z "${optionsShortList[i]}" -a ! -z "${optionsLongList[i]}" ] && echo -n ","
+	    # Print the full name, if any.
+	    [ ! -z "${optionsLongList[i]}" ] && echo -n " --${optionsLongList[i]}"
+	    # Different formats for different types of options.
+	    case "${optionsTypeList[i]}" in
+		"entry")
+		    echo " <entry>"                                # synopsis
+		    echo -e "		${optionsDescriptionList[i]}" # description
+		    # Print out possible values, if any.
+        	    if [ -n "${optionsValidStateList[i]}" ]; then
+        		echo -n "		Valid entries are:"
+        		for entry in ${optionsValidStateList[i]}; do
+			    echo -n " '$entry'"
+			done
+		    fi
+		    # Print out default value, if any.
+    		    if [ "${optionsStateList[i]}" != "#@unset@#" ]; then
+			echo "		The default value is '${optionsStateList[i]}'."
+    		    fi
+        	;;
+		"list")
+    		    echo " <entry>[:<entry>...]"                   # synopsis
+        	    echo -e "		${optionsDescriptionList[i]}" # description
+		    # Print out default value, if any.
+        	    if [ "${optionsStateList[i]}" != "#@unset@#" ]; then
+        		echo "		The default value is '${optionsStateList[i]}'."
+		    fi
+        	;;
+    		"boolean")
+        	    echo -e "		${optionsDescriptionList[i]}" # description
+        	;;
+    	    esac # esac is ridiculous (Hisham thinks that. I think bash is ridiculous).
+	done
+	echo
+	if [ "$script_examples" ]; then
+	    echo "Examples:"
+	    echo
+    	    # Read every line of the example and print it indented.
+	    echo -e "$script_examples" | while read line; do echo -e "   $script_name: $line"; done
+	    echo
+	fi
+    } | fmt -sw "$COLUMNS" # format the help to be displayed inside $COLUMNS columns.
+    exit 0
+}
+
+function cmdline_list_options() {
+    local i
+    for ((i=1; i <= optionsListSize; i++)); do
+	echo -n "-${optionsShortList[i]} --${optionsLongList[i]} "
+	done
+    echo
+    exit 0
+}
+
+# args: just pass $@; returns 1 if unknown options
+# NOTE: this aborts the script on errors, so better call it before any state change
+function cmdline_parse() {
+    # Make our array of arguments consistent with bash arrays numbering, which starts from 0.
+    # Otherwise parsedArguments[0] would be $1.
+    cmdline_add_arg "$0"
+    # Initially save all parameters as options.
+    savedOptions=("$@")
+    # Loop through parameters.
+    for (( i = 1; i <= $# ; i++ )); do
+	# Get the current parameter.
+	eval option=\${${i}} 
+	unknownOption=true
+	if [ "${option:0:1}" = "-" ]; then
+	    # We have a possible option (-<something>)
+	    if [ "${option:1:1}" = "-" ]; then
+		# A double dash, so it should be a long option (--<something>)
+        	if [ -z "${option:2:1}" ]; then
+		    # It's a lonely double dash '--'. Take the rest as arguments and stop parsing.
+    		    for (( j = i+1; j <= $# ; j++ )); do
+            		eval option=\${${j}}
+			cmdline_add_arg "$option"
+		    done
+		    break
+        	fi
+        	if echo "$option" | grep -q = -; then
+        	    # Value assignment with =.
+    		    opt=${option%%\=*}
+        	else
+    		    opt=${option}
+        	fi
+        	export parsedArguments=$[parsedArguments+1]
+        	# Loop through options.
+        	for j in `seq $optionsListSize`; do
+        	    if [ "$opt" = "--${optionsLongList[j]}" ]; then
+            		# We've found a valid (known) option
+        		unknownOption=false
+    			case "${optionsTypeList[j]}" in
+    			    "boolean")
+            			# Boolean options must be activated.
+        	    		optionsStateList[j]="on"
+        		    ;;
+            		    "entry"|"list")
+        			if echo "$option" | grep -q = -; then
+                		    # Long option value assignment with =.
+                		    val=${option#*=}
+                		else
+                		    # Else use next argument as value for the option.
+                    		    i=$[i+1]
+                    		    eval val=\${$i}
+                    		    export parsedArguments=$[parsedArguments+1]
+            			fi
+            			if [ -n "${optionsValidStateList[j]}" ]; then
+                    		    # Not all values can be assigned to this option.
+                    		    for avail in ${optionsValidStateList[j]}; do
+                    			if [ "${avail}" == "${val}" ]; then
+                        		    # The value is valid, add it to the array and exit the loop.
+                        		    optionsStateList[j]="${val}"
+                    			    break 2
+                    			fi
+                		    done
+                		    # The value is not valid, unfortunately.
+                		    die "Unknown entry '${val}' for option ${opt}"
+            			else
+            			    # Whichever value is ok
+                    		    optionsStateList[j]="${val}"
+            			fi
+                    	    ;;
+        		esac
+			break
+		    fi # valid option
+		done # loop through options
+        	if $unknownOption; then
+		    die "Unknown option: $opt"
+    		fi
+	    else # double dash
+    		# This is basically the same as before.
+        	# Loop through short options.
+        	for (( k = 1; k < ${#option} ; k++ )); do
+		    unknownOption=true
+    		    opt=${option:$k:1} # the k-th character in the string
+		    # Loop through available options
+		    for j in `seq $optionsListSize`; do
+            		if [ "$opt" = "${optionsShortList[j]}" ]; then
+                	    # We've found a valid (known) option.
+            		    unknownOption=false
+            		    case "${optionsTypeList[j]}" in
+            			"boolean")
+                    	    	    # Boolean options must be activated.
+                		    optionsStateList[j]="on"
+                		    break
+                    		;;
+            			"entry"|"list")
+                		    if [ ! -z "${option:$[k+1]:1}" ]; then
+                    			# If option is Entry and the next character in string isn't empty, use the 
+					# rest of the string as value for the option.
+                        		val=${option:$[k+1]:${#option}}
+                    		    else
+                        		# Else use next parameter as value for the option.
+                    			i=$[i+1]
+                    			eval val=\$$i
+                			export parsedArguments=$[parsedArguments+1]
+                		    fi
+                    		    if [ -n "${optionsValidStateList[j]}" ]; then
+                    			# Not all values can be assigned to this option.
+                    			for avail in ${optionsValidStateList[j]}; do
+                        		    if [ "${avail}" == "${val}" ]; then
+                            			# The value is valid, add it to the array.
+                        			optionsStateList[j]="${val}"
+                        			break 3
+                    			    fi
+                			done
+                    			# The value's not valid, unfortunately.
+                    			die "Unknown entry '${val}' for option ${opt}"
+				    else
+                    			optionsStateList[j]="${val}"
+                    			break 2
+                    		    fi
+                    		;;
+                	    esac
+            		fi # valid option
+    		    done # loop through options
+		    if $unknownOption; then
+        		die "Unknown option: -$opt"
+        	    fi
+    		done
+    		export parsedArguments=$[parsedArguments+1]
+	    fi # dash found
+	else
+	    # The parameter isn't an option.
+	    cmdline_add_arg "$option"
+	fi
+    done
+    # These options are common to every script, so check for them directly after parsing.
+    cmdline_option "help" && cmdline_show_help
+    cmdline_option "version" && cmdline_show_version
+    cmdline_option "list-options" && cmdline_list_options
+    [ "$cmdline_help_if_no_args" -a -z "$(cmdline_arg 1)" ] && cmdline_show_help
+}
+
+# options implemented here
+cmdline_add_boolean "h" "help" "Show this help."
+cmdline_add_boolean "" "version" "Show program version."
+

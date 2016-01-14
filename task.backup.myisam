@@ -1,0 +1,27 @@
+#!/bin/bash (source!)
+#
+# backup a MyISAM database by locking it up and copying its entire directory.
+#	implements: 			backup
+#	uses from task.backup: 		$dest_dir, $latest_backup_dir
+#	uses from server subject: 	$host, $username, $password, $myisam_dir, $srv_name
+#	uses from db subject:		$db
+#
+
+inherit task.backup
+
+backup() {
+    local direct_cmd="mysql-backup-event \"$myisam_dir/$db\" \"$dest_dir\" \"$latest_backup_dir\""
+    local sql_cmd="flush tables with read lock; system $direct_cmd; unlock tables;"
+
+    srv $srv_name status && local how="locking" || local how="non-locking"
+    
+    say "Doing myisam backup ($how) of $myisam_dir/$db -> $dest_dir..."
+    if [ "$how" == "locking" ]; then
+	ret="$(echo "$sql_cmd" | mysql --host="$host" --user="$username" --password="$password" --database="$db")"
+    else
+	$direct_cmd; ret="$?"
+    fi
+    [ "$ret" == "0" ] && return 0
+    return 1
+}
+

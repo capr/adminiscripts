@@ -1,0 +1,27 @@
+#!/bin/bash (source!)
+#
+# restore a mysql database from a mysqldump backup, via mysql utility
+#	implements: 			restore
+#	uses from task.restore: 	$src_dir
+#	uses from server subject: 	$host, $username, $password
+#	uses from db subject:		$db
+#
+
+inherit task.restore
+
+restore() {
+    say "Doing mysql restore from mysqldump of $db on $src_dir..."
+    {
+	echo "SET AUTOCOMMIT=0;"
+	echo "SET FOREIGN_KEY_CHECKS=0;"
+	
+	gunzip -c "$src_dir/backup.sql.gz"
+	
+	echo "SET FOREIGN_KEY_CHECKS=1;"
+	echo "COMMIT;"
+	echo "SET AUTOCOMMIT=1;"
+
+    } | 
+	mysql --host="$host" --user="$username" --password="$password" --database="$db"
+}
+

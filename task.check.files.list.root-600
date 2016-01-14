@@ -1,0 +1,8 @@
+#
+# files that must have root:root ownership and exactly 600 perms.
+# globbing and symlinks accepted.
+#
+
+# ssh won't open another connection if those files are not root:root 600!
+/etc/ssh/keys/*.key
+

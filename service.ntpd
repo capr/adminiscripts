@@ -1,0 +1,26 @@
+#!/bin/bash (source!)
+#
+# Intranet's OpenNTP server
+#	uses: $conf
+#
+# BUGS: kills all server instances.
+#
+
+inherit service
+
+service_start() {
+    ntpd -s -f "$conf"
+}
+
+service_stop() {
+    kill_pidof ntpd
+}
+
+service_status() {
+    running_pidof ntpd
+}
+
+service_help() {
+    echo "start stop status restart help"
+}
+

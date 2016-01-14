@@ -1,0 +1,10 @@
+#
+# root files and dirs that must be publicly writable.
+# globbing and symlinks accepted.
+#
+
+/lib/udev/devices/null
+/lib/udev/devices/zero
+/lib/udev/devices/random
+/lib/udev/devices/urandom
+

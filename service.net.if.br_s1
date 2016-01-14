@@ -1,0 +1,12 @@
+#!/bin/bash (source!)
+#
+# openvpn s1 server bridge
+#
+
+inherit service.net.if
+
+eth=br_s1
+ip=10.10.0.2
+netmask=255.255.0.0
+broadcast=10.10.255.255
+

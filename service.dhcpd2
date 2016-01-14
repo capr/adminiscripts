@@ -1,0 +1,14 @@
+#!/bin/bash (source!)
+#
+# Local DHCPD server #2
+#
+
+inherit service.dhcpd
+
+interface=br_s1t
+
+conf=/etc/dhcpd/dhcpd2.conf
+pid=/var/run/dhcpd2.pid #as per conf file
+lease_file=/var/spool/dhcpd2/leases #as per conf file
+
+

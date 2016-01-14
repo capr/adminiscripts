@@ -1,0 +1,14 @@
+#!/bin/bash (source!)
+#
+# isp link: synco @ mircea, ip #2
+#
+
+inherit service.net.if
+
+eth=eth_synco:0
+ip=87.239.226.254
+netmask=255.255.255.0
+broadcast=87.239.226.255
+gateway=87.239.226.1
+gateway_metric=1
+

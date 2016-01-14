@@ -1,0 +1,11 @@
+#!/bin/bash (source!)
+#
+# Local storage (reiserfs)
+#	uses: $service
+#
+
+inherit service.mount.by-label
+
+device_label="${service#mount.}"
+mount_options="noatime,barrier=flush,data=ordered"
+

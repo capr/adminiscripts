@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+# restore of magento's operations database
+#
+
+inherit task.restore.mysqldump
+inherit subject.mysqld.magento
+
+# for task.restore.mysqldump
+db=magento2
+

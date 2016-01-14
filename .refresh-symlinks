@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# don't forget to run this script after you modified event-handlers/, ui/, tools/.
+#
+
+. class
+
+pushd "$classes_path" >/dev/null
+
+say "Linking /bin..."
+find event-handlers/* ui/* tools/* | 
+    while read i; do 
+	ln -sf "../$i" "bin/$(basename "$i")"
+    done
+
+#say "Linking /etc.<profile> to /etc..."
+#find etc/* |
+#    while read src; do
+#	src="$(basename "$src")"
+#	find etc.* -type d |
+#	    while read dst; do
+#		ln -sf "../etc/$src" "$dst/$src"
+#	    done
+#    done
+
+popd >/dev/null
+

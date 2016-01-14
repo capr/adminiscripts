@@ -1,0 +1,33 @@
+#!/bin/bash (source!)
+#
+# Local udevd
+#
+
+inherit service
+
+service_start() {
+    mount -t tmpfs dev /dev
+    cp -a -f /lib/udev/devices/* /dev
+    mount -t devpts devpts /dev/pts
+    #mount -t tmpfs devshm /dev/shm
+    udevd --daemon
+    echo "" > /proc/sys/kernel/hotplug
+    udevadm trigger
+    udevadm settle --timeout=10
+    return 0
+}
+
+service_stop() {
+    kill_pidof udevd && umount /dev/shm && umount /dev/pts && umount /dev && return 0
+    return 1
+}
+
+service_status() {
+    running_pidof udevd
+    return $?
+}
+
+service_help() {
+    echo "start stop status restart help"
+}
+

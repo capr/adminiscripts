@@ -1,0 +1,13 @@
+#!/bin/bash (source!)
+#
+# firebird servers (template, based on $service variable)
+#
+
+inherit service.firebird
+
+FIREBIRD="/etc/firebird/$service"
+FIREBIRD_TMP="/var/tmp/$service"
+#FIREBIRD_TMP="/mnt/ram/$service/tmp"
+pid="/var/run/$service.pid"
+fb_user=$service
+

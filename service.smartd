@@ -1,0 +1,30 @@
+#!/bin/bash (source!)
+#
+# Local smartd (S.M.A.R.T. daemon)
+#
+
+inherit service
+
+# check SMART data each $check_interval number of seconds.
+check_interval=1800
+
+conf=/etc/smartd.conf
+pid=/var/run/smartd.pid
+facility=local3 # as per syslog.conf
+
+service_start() { 
+    smartd -c "$conf" -l "$facility" -p "$pid" -q never -i "$check_interval"
+}
+
+service_stop() {
+    kill_pidfile "$pid"
+}
+
+service_status() {
+    running_pidfile "$pid"
+}
+
+service_help() {
+    echo "start stop status restart help"
+}
+

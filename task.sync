@@ -1,0 +1,41 @@
+#!/bin/sh
+#
+# synchronize (backup) a directory using rsync. extraneous files are deleted at the destination. source can be filtered.
+#	uses from subjects:
+#		$source			what to sync; terminate with "/" to copy dir's contents rather than dir itself
+#		$dest			where to put the files
+#		include_files()		optional; only sync certain files from inside $source and delete everything else!
+#		$bw_limit_kbps		optional; transfer bandwidth limit, in KB/s
+#		post_sync		optional; do more stuff after sync
+#	uses from ui:
+#		$verbose		make rsync splash everything on screen (TODO: no logging of that!)
+#		$testmode		run without side effects
+#
+# BUGS: -D does not work! no device files, sockets, fifos are copied!!
+#
+
+inherit locking
+
+#override this
+include_files() { echo "*"; }
+
+#override this
+post_sync() { return 0; }
+
+task_run() {
+    aquire_lock "$task"
+    
+    local opt=""
+    [ "$bw_limit_kbps" ] && opt="$opt --bwlimit $bw_limit_kbps"
+    [ "$verbose" ] && opt="$opt -v --progress"
+    [ "$testmode" ] && opt="$opt -n"
+
+    include_files | rsync -axrHSD --delete --include-from=- --exclude='*' --delete-excluded $opt "$source" "$dest"; ret=$?
+
+    post_sync
+    release_lock "$task"
+    return $ret
+}
+
+task_running() { locked "$task"; }
+

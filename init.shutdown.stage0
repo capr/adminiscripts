@@ -1,0 +1,8 @@
+#!/bin/bash (source!)
+#
+# stage0 shutdown. analog to init.boot.stage0
+#
+
+# unmount kernel filesystems
+umount /sys
+umount /proc

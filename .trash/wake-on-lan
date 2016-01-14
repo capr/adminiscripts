@@ -1,0 +1,53 @@
+#!/bin/bash
+
+. ScriptFunctions
+
+Import Log
+Import OptionParser
+Import GoboLinux
+
+scriptDescription="Wrapper script for wakelan using host names declared in a configuration file."
+scriptCredits="by Cosmin Apreutesei. Released under the GNU GPL."
+helpOnNoArguments=yes
+scriptUsage="hostname"
+Add_Option_Boolean	"t" "test" "Don't actually send the WOL packets."
+Add_Option_Entry	"f" "file" "Configuration file to use" "/etc/wake-on-lan.conf"
+
+Parse_Options "$@"
+
+eval `Args_To_Array param_hosts`
+
+[ ! -f `Entry file` ] && {
+	Log_Error "`Entry file` not found."
+	exit 1
+}
+source `Entry file`
+
+Wake() {
+	Parameters "$@" mac_address
+	wakelan -b "$broadcast_address" -m "$mac_address"
+}
+
+MatchHost() {
+	Parameters "$@" param_host mac_address match_host
+	if [ "$param_host" = "$match_host" ]
+	then
+		Log_Verbose "Sending WOL packet to host $param_host with MAC address $mac_address" 
+		Is_Entry "test" || Wake "$mac_address"
+		return 0
+	fi
+	return 1
+}
+
+for host in "${param_hosts[@]}"
+do
+	err=1
+	for mac_line in "${mac_addresses[@]}"
+	do
+		MatchHost $host $mac_line
+		err=$?
+		[ $err = 0 ] && break
+	done
+	[ $err != 0 ] && Log_Error "Host $host not found in `Entry file`"
+done
+

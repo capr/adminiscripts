@@ -1,0 +1,29 @@
+#!/bin/bash (source!)
+#
+# Intranet's tftpd for netbooting
+#
+
+inherit service
+
+listening_address="$(lookup tftpd.local)"
+username=tftpd
+
+service_start() {
+    in.tftpd -l -a "$listening_address" -u "$username"
+    return $?
+}
+
+service_stop() {
+    kill_pidof in.tftpd
+    return $?
+}
+
+service_status() {
+    running_pidof in.tftpd
+    return $?
+}
+
+service_help() {
+    echo "start stop status restart help"
+}
+

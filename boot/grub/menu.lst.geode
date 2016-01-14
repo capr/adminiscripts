@@ -1,0 +1,5 @@
+default 0
+timeout 1
+
+title GoboLinux geode profile from (hd0,0)
+kernel (hd0,0)/boot/kernel vt.default_utf8=0 vga=791 root=/dev/sda1 profile=geode loglevel=5

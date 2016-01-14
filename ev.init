@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# As per inittab, it recieves event name as $1: boot, single, reboot, halt.
+#
+
+[ "$1" == "" ] && { echo "Usage: $0 <init-event> but better use it with inittab"; exit 0; }
+
+# assume PATH is hardcoded to /bin
+. class
+
+inherit "init-scripts/$1"
+

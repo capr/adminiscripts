@@ -1,0 +1,16 @@
+#!/bin/bash
+
+inherit task.openvpn
+
+task_run() {
+    local key="$1"
+    [ "$key" ] || die "Usage: $@ <key base name>"
+    "$EASY_RSA/pkitool" $key
+    
+    local f="/etc/openvpn/keys/$1.key"
+    
+    # fix permissions according to our group-based permission-scheme
+    chgrp 0 "$f"
+    chmod u+r "$f" 
+}
+

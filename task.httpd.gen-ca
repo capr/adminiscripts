@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+#	uses: $keydir
+#
+
+inherit task.httpd
+
+ca="Gazolin Certificate Authority"
+
+task_run() {
+    echo "*** NOTE: Common Name (CN) should not be a domain name, but a company name! ***"
+    openssl genrsa -des3 -out "$keydir/ca.key" 4096
+    openssl req -new -x509 -days 3650 -key "$keydir/ca.key" -out "$keydir/ca.crt"
+}
+

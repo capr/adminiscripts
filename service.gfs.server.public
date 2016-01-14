@@ -1,0 +1,12 @@
+#!/bin/bash (source!)
+#
+# GlusterFS posix server
+#
+
+inherit service.gfs.server
+
+vol_file=/etc/glusterfs/server.public.vol
+vol_name=server
+log=/var/log/gfs.server.public.log
+pid=/var/run/gfs.server.public.pid
+

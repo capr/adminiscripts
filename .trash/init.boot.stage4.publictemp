@@ -1,0 +1,36 @@
+#!/bin/bash (source!)
+#
+# services @ publictemp
+#
+
+# backup storage
+hdparm -W0 /dev/sdb >/dev/null
+srv mount.backup1 up
+hdparm -W0 /dev/sdc >/dev/null
+srv mount.backup2 up
+srv mount.root.local.bk up
+
+# from local...
+srv mysqld up
+srv httpd.intranet up
+srv fbtest up
+srv httpd.gtest up
+srv httpd.mtest up
+srv smbd up
+
+# from public ...
+srv openvpn.s1udp1 up
+srv openvpn.s1tcp1 up
+srv named.public1 up
+srv ftpd1 up
+srv postfix up
+srv fb up
+srv httpd.magento up
+srv httpd.gstatic up
+
+srv dhcpd1t up
+srv net.ipfw.synco up
+srv net.portfw.mircea-synco up
+
+srv crond.publictemp up
+

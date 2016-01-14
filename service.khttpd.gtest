@@ -1,0 +1,10 @@
+#!/bin/bash (source!)
+#
+# gtest
+#
+
+inherit service.khttpd
+
+conf=/etc/lighttpd/lighttpd.gtest.conf
+pid=/var/run/lighttpd.gtest.pid
+

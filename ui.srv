@@ -1,0 +1,167 @@
+#!/bin/bash
+#
+# service controller for published services (i.e. from ./services)
+#	implements:
+#		$service	; the name of the service
+#		$verbose	; used by say(), see the `logging` module
+#	uses:
+#		service_start() -> ret_code	; the routine that starts the service
+#		service_stop() -> ret_code	; the routine that stops the service 
+#		service_kill() -> ret_code	; optional routine to kill the service if stopping fails
+#		service_help()			; must return a list of available commands
+#		service_status() -> running?	; 0 = running, 1 = not running
+#		service_<something-else>()	; custom command to run
+#
+
+. class
+inherit cmdline
+
+# cmdline config
+script_name="Service controller"
+script_version="1.0"
+script_usage="[-v | --verbose] [-f | --force] [{<service-name> | all} [command [parameters]]]"
+script_description="Service controller for published services (i.e. service classes in ./services)"
+# cmdline config
+cmdline_add_boolean "v" "verbose" "Show progress info"
+cmdline_add_boolean "f" "force" "Force start/stop of service"
+cmdline_parse "$@"
+# how many seconds until we decide that a start or stop failed
+service_start_timeout=10
+service_stop_timeout=10
+# enable this if you want to log srv commands
+#syslog_facility=user
+# parse cmdline
+services_dir="$classes_path/services"
+service="$(cmdline_arg 1)"
+command="$(cmdline_arg 2)"
+params="$(cmdline_args 3)"
+cmdline_option verbose && verbose="1"
+
+out_prefix="[$service $command]: "
+
+# check if this service implements a certain command
+# the list of published commands is returned by service_help()
+# TODO: detect implemented commands automatically
+has_command() { in_list "$1" "$(service_help)"; }
+
+# Usage: wait_for <return_code> <timeout_seconds> <command>
+# Behavior: waits for <command> to return <return_code> (and returns 0) or for <timeout_seconds> to expire (and returns 1).
+wait_for() {
+    wait_ret="$1"; timeout_ms="$2"; timeout_ms=$[timeout_ms * 1000]; cmd="$3"; waited_ms="0"
+    "$cmd"; ret=$?
+    while [ "$ret" != "$wait_ret" -a "$waited_ms" -lt "$timeout_ms" ]
+    do
+	sleep 0.1
+	sayb
+	waited_ms=$[waited_ms + 100]
+	"$cmd"; ret=$?
+    done
+    [ "$ret" == "$wait_ret" ] && return 0 || return 1
+}
+
+# without any cmdline args, `-v all status` is assumed
+[ -z "$service" ] && exec "$0" -v all status
+# `list` is a special argument to list available services
+if [ "$service" = "list" ]; then
+    pushd "$services_dir" >/dev/null
+    find * -maxdepth 0 -type l
+    popd >/dev/null
+    exit 0
+fi
+# default command is `status`
+[ -z "$command" ] && command="status"
+# `all` is a special wildcard service to execute a command on all services
+if [ "$service" = "all" ]; then
+    ### TODO: make cmdline_options work and replace -v below!
+    for i in $("$0" list); do
+	"$0" -v "$i" "$command"
+    done
+    exit 0
+fi
+# check if the service exists
+[ -f "$services_dir/$service" ] || die "Unknown service. Type 'srv list' for a list of available services."
+# "up" and "down" are synonims for "start" and "stop"
+[ "$command" = "up" ] && command="start"
+[ "$command" = "down" ] && command="stop"
+# "restart" is a higher-level command we can implement here
+if [ "$command" = "restart" ]; then
+    "$0" -v "$service" stop $params
+    "$0" -v "$service" start $params
+    exit 0
+fi
+
+# load the actual service script
+inherit "services/$service"
+
+# check if the requested command is implemented
+if ! has_command "$command"; then
+    die "Command '$command' not implemented."
+fi
+
+# encapsulate the start/stop logic
+if [ "$command" = "start" ]; then
+    
+    if has_command "status" && ! cmdline_option force; then
+	service_status && die "Already running."
+    fi
+    
+    sayn "Starting..."
+    service_start $params; ret=$?
+    [ $ret != 0 ] && die "Failed [$ret]."
+    
+    if has_command "status"; then
+	wait_for 0 "$service_start_timeout" service_status; ret=$?
+	[ $ret != 0 ] && die "Failed to start in $service_start_timeout seconds."
+    fi
+    
+    sayb "OK"
+    exit 0
+fi
+
+# a service may implement service_kill() as a fallback for when stop fails
+kill_service() {
+    if has_command "kill"; then
+	sayn "Killing..."
+	service_kill; ret=$?
+	[ $ret != 0 ] && die "Failed to kill [$ret]." || say "OK"
+    fi
+}
+
+if [ "$command" = "stop" ]; then
+
+    if has_command "status" && ! cmdline_option force; then
+	service_status || die "Wasn't running."
+    fi
+    
+    sayn "Stopping..."
+    service_stop $params; ret=$?
+    
+    if [ $ret != 0 ]; then
+	error "Failed to stop [$ret]."
+	kill_service
+	exit $?
+    fi
+	
+    if has_command "status"; then
+	if ! wait_for 1 "$service_stop_timeout" service_status; then
+    	    error "Failed to stop in $service_stop_timeout seconds."
+	    kill_service
+	    exit $?
+	fi
+    fi
+    
+    sayb "OK"
+    exit 0
+fi
+
+if [ "$command" = "status" ]; then
+    service_status $params; ret=$?
+    [ $ret = 0 ] && say "UP" || say "DOWN"
+    exit $ret
+fi
+
+# the command is a custom command particular to the service script; run it.
+service_$command $params; ret=$?
+[ $ret = 0 ] && say "OK" || say "FAILED"
+exit $ret
+

@@ -1,0 +1,40 @@
+#!/bin/bash (source!)
+#
+# service to move files to a ramdrive and back to persistent storage
+#	uses: $ram_path $disk_path, $link (optional), $allow_move_cmd
+#
+
+inherit service
+
+service_start() {
+    allow_move || die "Not allowed."
+    mkdir -p "$(dirname "$ram_path")"
+    cp -f "$disk_path" "$ram_path"; ret=$?
+    [ $ret = 0 -a "$link" ] && ln -sf "$ram_path" "$link"
+    return $ret
+}
+
+service_stop() {
+    allow_move || die "Not allowed."
+    cp -f "$ram_path" "$disk_path"; ret=$?
+    [ $ret = 0 -a "$link" ] && ln -sf "$disk_path" "$link"
+    rm "$ram_path"
+    return $ret
+}
+
+service_status() {
+    [ -f "$ram_path" ] && return 0
+    return 1
+}
+
+service_save() {
+    allow_move || die "Not allowed."
+    service_status || return 1
+    cp -f "$ram_path" "$disk_path"; ret=$?
+    return $ret    
+}
+
+service_help() {
+    echo "start stop status save help"
+}
+

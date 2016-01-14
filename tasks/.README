@@ -1,0 +1,6 @@
+tasks namespace.
+
+tasks are programs that are driven by the `tsk' ui.
+
+you run a task with `tsk <task> [options]'.
+

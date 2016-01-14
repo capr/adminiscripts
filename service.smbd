@@ -1,0 +1,43 @@
+#!/bin/bash (source!)
+#
+# Intranet's samba server
+#
+
+inherit service
+
+conf=/etc/smb.conf
+smbd_pid=/var/run/smbd-smb.conf.pid	# as per smb.conf
+nmbd_pid=/var/run/nmbd-smb.conf.pid	# as per smb.conf
+lockdir=/var/run/samba/locks		# as per smb.conf
+
+service_start() {
+    mkdir -p "$lockdir"
+    touch "$lockdir/messages.tdb"
+    
+    push_chain
+    chained smbd -D -s "$conf"
+    chained nmbd -D -s "$conf"
+    if ! pop_chain; then
+	service_stop
+	return 1
+    fi
+}
+
+service_stop() {
+    push_chain
+    chained kill_pidfile "$smbd_pid"
+    chained kill_pidfile "$nmbd_pid"
+    pop_chain
+}
+
+service_status() {
+    push_chain
+    chained running_pidfile "$smbd_pid" clean
+    chained running_pidfile "$nmbd_pid" clean
+    pop_chain
+}
+
+service_help() {
+    echo "start stop status restart help"
+}
+

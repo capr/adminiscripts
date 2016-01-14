@@ -1,0 +1,30 @@
+#!/bin/bash (source!)
+#
+# stage2 boot (read/write, self-serving)
+#
+
+# mount the r/w filesystem (only after this, writing to local filesystem works)
+srv mount.data.local up
+
+rm -Rf /var/tmp/*
+
+# TODO: check if this is ok (i.e. there are no services that can't create the files and dirs they need on their own!)
+#rm -Rf /var/run/*
+
+touch /var/{run/utmp,log/wtmp}
+
+srv clock up
+
+# start logging on the r/w filesystem (TODO: see if any of these can be started sooner!)
+srv klogd up
+srv bootlogd up
+srv syslogd up
+srv smartd up
+#srv sensord up
+#srv upsd up
+
+srv swap1 up
+srv swap2 up
+
+srv net.if.lo up
+

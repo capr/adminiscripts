@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+# backup of gtest's operations database
+#
+
+inherit task.backup.firebird
+inherit subject.firebird.fbtest
+
+# for task.backup
+backup_life_days=7
+backup_life_issues=56
+
+# for task.backup.firebird: database subject
+db=gazolin_test
+

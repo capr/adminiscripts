@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+
+. class
+inherit locking
+
+echo "$(cat "$(lock_file x .)" 2>/dev/null)"
+aquire_lock x . || die "lock already aquired by $(cat "$(lock_file x .)")"
+echo "lock aquired by $$"
+
+{
+    sleep 10
+    release_lock x . && echo "lock released from $$"
+} &
+
+while locked x .; do
+    echo .
+    sleep 1
+done
+
+echo "not locked anymore. waiting..."
+wait
+echo "done"
+

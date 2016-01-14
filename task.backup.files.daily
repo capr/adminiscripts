@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# daily incremental backup of files for archiving purposes
+#
+
+inherit task.backup.files
+
+catalog_dir="$classes_path/backup-catalogs/daily"
+bw_limit_kbps=8192
+backup_life_days=90
+backup_life_issues=30
+

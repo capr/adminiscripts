@@ -1,0 +1,11 @@
+#!/bin/bash (source!)
+#
+# firewall @ public
+#
+
+inherit service.net.firewall
+
+tcp_ports="ftp ssh dns http https 444 8080"
+udp_ports="dns openvpn"
+blocked_ips="216.129.119.17"
+

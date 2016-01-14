@@ -1,0 +1,10 @@
+#!/bin/bash (source!)
+#
+# upload ftp server #1
+#
+
+inherit service.ftpd
+
+pidfile=/var/run/ftpd1.pid
+bind_address=ftp1.local
+

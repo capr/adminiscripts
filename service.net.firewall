@@ -1,0 +1,66 @@
+#!/bin/bash (source!)
+#
+# firewall for a single interface
+#	uses: $eth, $tcp_ports, $udp_ports, $blocked_ips
+#
+# TODO: implement status
+# TODO: implement limit and limit-burst for DoS-vulnerable protocols and ports
+# TODO: reject spoofed packets (need to know the address of the internal network)
+#
+
+inherit service
+
+do_it() {
+    # NOTE: we assume the default ACCEPT policy for the INPUT and OUTPUT chains.
+
+    # allow certain icmp -> $eth
+    for icmp_type in echo-request echo-reply destination-unreachable time-exceeded \
+			fragmentation-needed timestamp-request timestamp-reply; do
+	say "icmp: $icmp_type"
+	iptables $1 INPUT -i $eth -p icmp --icmp-type $icmp_type -j ACCEPT
+    done
+    
+    # cool down ping
+    #iptables $1 INPUT -i $eth -p icmp --icmp-type 8 -m limit --limit 10/second -j ACCEPT # echo, limited to 10/s
+    
+    # allow connections once established or related -> $eth (helps UDP, DNS and passive FTP)
+    iptables $1 INPUT -i $eth -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+    # block IPs in the blacklist
+    for ip in $blocked_ips; do
+	say "block $ip"
+	iptables $1 INPUT -i $eth -s $ip -j DROP 
+    done
+
+    # allow designated tcp ports
+    for port in $tcp_ports; do
+	say "$port/tcp"
+	iptables $1 INPUT -i $eth -p tcp --dport $port -m state --state NEW -j ACCEPT
+    done
+    
+    # allow designated udp ports
+    for port in $udp_ports; do
+	say "$port/udp"
+	iptables $1 INPUT -i $eth -p udp --dport $port -m state --state NEW -j ACCEPT
+    done
+    
+    # reject everything else properly
+    iptables $1 INPUT -i $eth -p tcp -j REJECT --reject-with tcp-reset		# reject */tcp -> $eth with RST message.
+    iptables $1 INPUT -i $eth -j REJECT --reject-with icmp-port-unreachable	# reject * -> $eth with ICMP message.
+}
+
+service_start() {
+    modprobe ip_conntrack
+    modprobe ip_conntrack_ftp
+
+    do_it -A
+}
+
+service_stop() {
+    do_it -D
+}
+
+service_help() {
+    echo "start stop restart help"
+}
+

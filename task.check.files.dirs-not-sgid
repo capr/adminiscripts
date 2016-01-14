@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# file check script
+#	implements: what, short, info, search(), fix()
+#
+
+inherit task.check.files
+
+what="directories without setgid"
+short="D"
+info="Directories should be setgid or permissions won't be inherited inside them."
+exclude_list="task.check.files.list.dirs-not-sgid"
+
+search() {
+    find "$1" -xdev -type d ! -perm /g=s
+}
+
+fix() {
+    chmod g+s "$1"
+}
+

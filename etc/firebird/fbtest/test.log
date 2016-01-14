@@ -1,0 +1,48 @@
+2009-08-01T21:11:04.7850 (20041:0xb7013dbc) TRACE_INIT
+	SESSION_1 Firebird Audit
+	
+
+2009-08-01T21:11:04.7850 (20041:0xb7013dbc) FAILED ATTACH_DATABASE
+	/mnt/data.local/Files/fbtest-database-directory/test.fdb (ATT_0, SYSDBA, TCPv4:10.0.0.1)
+	/Programs/Lua/5.1.4/bin/lua:20471
+
+2009-08-01T21:11:04.7850 (20041:0xb7013dbc) TRACE_FINI
+	SESSION_1 Firebird Audit
+	
+
+2009-08-01T21:11:04.8390 (20041:0xb7013c10) TRACE_INIT
+	SESSION_1 Firebird Audit
+	
+
+2009-08-01T21:11:04.8390 (20041:0xb7013c10) FAILED CREATE_DATABASE
+	/mnt/data.local/Files/fbtest-database-directory/test.fdb (ATT_0, SYSDBA, TCPv4:10.0.0.1)
+	/Programs/Lua/5.1.4/bin/lua:20471
+
+2009-08-01T21:11:04.8390 (20041:0xb7013c10) TRACE_FINI
+	SESSION_1 Firebird Audit
+	
+
+2009-08-01T21:12:10.4000 (20813:0xb70c5dbc) TRACE_INIT
+	SESSION_1 Firebird Audit
+	
+
+2009-08-01T21:12:10.4000 (20813:0xb70c5dbc) FAILED ATTACH_DATABASE
+	/mnt/data.local/Files/fbtest-database-directory/test.fdb (ATT_0, SYSDBA, TCPv4:10.0.0.1)
+	/Programs/Lua/5.1.4/bin/lua:20823
+
+2009-08-01T21:12:10.4000 (20813:0xb70c5dbc) TRACE_FINI
+	SESSION_1 Firebird Audit
+	
+
+2009-08-01T21:12:10.4240 (20813:0xb70c5c10) TRACE_INIT
+	SESSION_1 Firebird Audit
+	
+
+2009-08-01T21:12:10.4240 (20813:0xb70c5c10) FAILED CREATE_DATABASE
+	/mnt/data.local/Files/fbtest-database-directory/test.fdb (ATT_0, SYSDBA, TCPv4:10.0.0.1)
+	/Programs/Lua/5.1.4/bin/lua:20823
+
+2009-08-01T21:12:10.4240 (20813:0xb70c5c10) TRACE_FINI
+	SESSION_1 Firebird Audit
+	
+

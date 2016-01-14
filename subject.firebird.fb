@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+# gazolin fb server
+#
+# ATTN: keep this file private as it contains passwords!
+#
+
+FIREBIRD=/etc/firebird/fb
+host=fb.local
+username=sysdba
+inherit password.firebird.fb

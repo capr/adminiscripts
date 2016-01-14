@@ -1,0 +1,27 @@
+#!/bin/bash (source!)
+#
+# Local crond
+#	uses: $crontab_dir
+#
+# BUGS: stopping the server kills all crond instances.
+#
+
+inherit service
+
+service_start() {
+    # stupid crond shows greeting on stderr
+    crond -l9 -s "$crontab_dir" 2>/dev/null; return $?
+}
+
+service_stop() {
+    kill_pidof crond
+}
+
+service_status() {
+    running_pidof crond
+}
+
+service_help() {
+    echo "start stop status restart help"
+}
+

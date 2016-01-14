@@ -1,0 +1,76 @@
+#!/bin/bash (source!)
+#
+# logging API
+#	implements:
+#		say <message>
+#		bug <message>
+#		die <message>
+#		error <message>
+#		assert <non_empty>
+#		assert_not <a> <b>
+#		assert_var <var_name>
+#		log <log_file> <message>
+#	uses:
+#		$verbose, $date_format, $out_prefix, $syslog_facility
+#
+#
+
+date_format="+%Y-%m-%d.%H:%M:%S"
+out_prefix="$(basename "$0"): "
+
+log() {
+    if [ "$syslog_facility" ]; then
+	level="$1"; shift
+	logger -d -p "$syslog_facility.$level" "${out_prefix}$@"
+    fi
+}
+
+say() { 
+    [ "$verbose" ] && echo -e "${out_prefix}$@"
+    log info "$@"
+}
+
+### note this stuff is just visual, so it's not logged!
+sayn() { [ "$verbose" ] && echo -ne "${out_prefix}$@"; }
+
+wchars[0]="/"
+wchars[1]="-"
+wchars[2]="\\"
+wchars[3]="|"
+lwci=0
+sayb() { 
+    if [ "$verbose" ]; then
+	if [ ! "$@" ]; then
+	    echo -ne "\b${wchars[$lwci]}"
+	    lwci=$((lwci+1)); [ $lwci = 4 ] && lwci=0
+	else
+	    echo -e "\b$@"
+	fi
+    fi
+}
+
+# pie or death :)
+bug() { 
+    echo -e "${out_prefix}Internal error: $@" >&2
+    log err "Internal error: $@"
+    exit 1
+}
+
+die() { 
+    echo -e "${out_prefix}$@" >&2
+    log warn "$@"
+    exit 1
+}
+
+error() {
+    [ "$@" ] && {
+	echo -e "${out_prefix}$@" >&2
+	log warn "$@"
+    }
+    return 1
+}
+
+assert() { [ "$1" == "" ] && bug "Assertion failed"; }
+assert_not() { [ "$1" == "$2" ] && bug "Assertion failed"; }
+assert_var() { [ "$(eval "echo \$$1")" == "" ] && bug "Assertion failed. Missing variable $1.";  }
+

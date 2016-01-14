@@ -1,0 +1,30 @@
+#!/bin/bash (source!)
+#
+# backup ibdata1
+#	implements: 			backup
+#	uses from task.backup: 		$dest_dir
+#	uses from server subject: 	$innodb_dir, $myisam_dir
+#	uses from db subject:		$srv_name
+#
+
+inherit task.backup
+
+backup() {
+    [ "$verbose" ] && v="-v"
+
+    say "Doing innodb backup of $innodb_dir -> $dest_dir..."
+    srv $v $srv_name down
+    if srv $srv_name status; then
+	error "Server not down. Cannot continue."
+	srv $v $srv_name up
+	return 1
+    fi
+    
+    zip -qrj "$dest_dir/ibdata_and_logfiles.zip" "$innodb_dir/"*
+    
+    #alternatives:
+    #tar -czvf "$dest_dir/ibdata_and_logfiles.tar.gz" "$innodb_dir/"*
+    
+    srv $v $srv_name up
+}
+

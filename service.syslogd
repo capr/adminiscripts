@@ -1,0 +1,29 @@
+#!/bin/bash (source!)
+#
+# Local syslogd
+#
+
+inherit service
+
+conf=/etc/syslog.conf
+pid=/var/run/syslogd.pid
+
+service_start() {
+    syslogd -f "$conf" -m 0
+    return $?
+}
+
+service_stop() {
+    kill_pidfile "$pid"
+    return $?
+}
+
+service_status() {
+    running_pidfile "$pid"
+    return $?
+}
+
+service_help() {
+    echo "start stop status restart help"
+}
+

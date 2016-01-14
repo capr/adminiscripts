@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+#	syncs / to a hot-standby backup partition which should be bootable and have a grub entry to boot from it.
+#
+#	implements: $source_file
+#	uses: $profile
+#
+
+inherit task.sync
+
+source_file=/
+
+post_sync() {
+    pushd "$dest_dir" >/dev/null
+    
+    # in here we document all the layout differences between server profiles.
+    
+    ln -sf "menu.lst.$profile" "boot/grub/menu.lst"
+    ln -sf "resolv.conf.$profile" "etc/resolv.conf"
+    
+    popd >/dev/null
+}
+

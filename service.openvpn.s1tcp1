@@ -1,0 +1,11 @@
+#!/bin/bash (source!)
+#
+# Public OpenVPN server #1 for tcp
+# Note: clients should use this only when they can't reach the udp server!
+#
+
+inherit service.openvpn
+
+conf=/etc/openvpn/server.s1tcp1.conf
+pid=/var/run/openvpn.s1tcp1.pid # as per conf file
+

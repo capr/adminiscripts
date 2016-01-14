@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# capture pam events with pam_exec.so
+# possible events given as $1: auth, account, session, password
+# ATTN! this file must be r-x by others or by whoever user needs to pam_close_session!
+#
+
+logfile=/var/log/pam-event.log
+debug=no
+
+if [ "$debug" = "yes" ]
+then
+    exec >>"$logfile" 2>&1
+else
+    exec >/dev/null 2>&1
+fi
+
+echo "$(date): $1:$PAM_SERVICE"
+

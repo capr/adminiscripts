@@ -1,0 +1,9 @@
+#!/bin/bash (source!)
+#
+# create tap interfaces for client c1
+#
+
+inherit service.net.taps
+
+taps="tap_c1tcp tap_c1udp"
+
